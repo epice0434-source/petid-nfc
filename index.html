@@ -3,1385 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PatiLink - NFC Hayvan Takip Sistemi</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>PatiLink - NFC Hayvan Takibi</title>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Stil için Tailwind -->
     <style>
-        body {
-            box-sizing: border-box;
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .pet-card {
-            transition: all 0.3s ease;
-            transform: translateY(0);
-        }
-        .pet-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        .location-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-        .call-button {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-        .call-button:hover {
-            background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%);
-        }
-        .emergency-button {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        .modal {
-            backdrop-filter: blur(10px);
-        }
-        .form-input {
-            transition: all 0.3s ease;
-        }
-        .form-input:focus {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .qr-code {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            padding: 20px;
-            border-radius: 15px;
-        }
-        .feature-card {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        }
-        .premium-badge {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-        }
-        .notification {
-            animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .image-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-        }
-        .gallery-item {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .gallery-item:hover {
-            transform: scale(1.05);
-        }
-        .tab-button {
-            transition: all 0.3s ease;
-        }
-        .tab-button.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+        body { font-family: Arial, sans-serif; }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="min-h-full bg-gray-50">
-    <!-- Navigation -->
-    <nav class="gradient-bg shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <h1 class="text-2xl font-bold text-white">🐾 PatiLink</h1>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="loginBtn" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">Giriş Yap</button>
-                    <button id="registerBtn" class="bg-white text-purple-600 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-medium">Üye Ol</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div id="mainContent" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Welcome Section -->
-        <div id="welcomeSection" class="mb-12">
-            <div class="text-center mb-16">
-                <h2 class="text-5xl font-bold text-gray-900 mb-6">Hayvanınızı NFC ile Koruyun</h2>
-                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">Kaybolduğunda hemen bulunabilsin. Tasmasına NFC tag takın, detaylı profilini oluşturun ve anlık takip edin.</p>
-            </div>
-
-            <!-- Features Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-                <div class="feature-card p-6 rounded-xl shadow-lg text-center">
-                    <div class="text-5xl mb-4">📱</div>
-                    <h3 class="text-xl font-semibold mb-3">NFC Teknolojisi</h3>
-                    <p class="text-gray-700">Telefon yaklaştırıldığında otomatik profil açılır</p>
-                </div>
-                <div class="feature-card p-6 rounded-xl shadow-lg text-center">
-                    <div class="text-5xl mb-4">📊</div>
-                    <h3 class="text-xl font-semibold mb-3">Anlık İstatistikler</h3>
-                    <p class="text-gray-700">Kaç kişinin taradığını ve aradığını görün</p>
-                </div>
-                <div class="feature-card p-6 rounded-xl shadow-lg text-center">
-                    <div class="text-5xl mb-4">📍</div>
-                    <h3 class="text-xl font-semibold mb-3">Konum Takibi</h3>
-                    <p class="text-gray-700">Hayvanınızı bulan kişilerin konumunu görün</p>
-                </div>
-                <div class="feature-card p-6 rounded-xl shadow-lg text-center">
-                    <div class="text-5xl mb-4">🚨</div>
-                    <h3 class="text-xl font-semibold mb-3">Acil Durum</h3>
-                    <p class="text-gray-700">Tek tıkla arama ve yönlendirme</p>
-                </div>
-            </div>
-
-            <!-- How It Works -->
-            <div class="bg-white rounded-2xl shadow-xl p-8 mb-16">
-                <h3 class="text-3xl font-bold text-center mb-12">Nasıl Çalışır?</h3>
-                <div class="grid md:grid-cols-5 gap-8">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">1</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">Üye Olun</h4>
-                        <p class="text-sm text-gray-600">Hesap oluşturun</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">2</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">Profil Oluşturun</h4>
-                        <p class="text-sm text-gray-600">Hayvan bilgilerini girin</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">3</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">NFC Tag Alın</h4>
-                        <p class="text-sm text-gray-600">Tasmasına takın</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">4</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">Link Yazın</h4>
-                        <p class="text-sm text-gray-600">NFC'ye profil linkini yazın</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">5</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">Güvende Olun</h4>
-                        <p class="text-sm text-gray-600">Anlık takip edin</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Testimonials -->
-            <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-8">
-                <h3 class="text-3xl font-bold text-center mb-8">Kullanıcı Yorumları</h3>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="bg-white rounded-lg p-6 shadow-lg">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center mr-4">
-                                <span class="text-xl">👩</span>
-                            </div>
-                            <div>
-                                <h5 class="font-semibold">Ayşe K.</h5>
-                                <div class="text-yellow-400">⭐⭐⭐⭐⭐</div>
-                            </div>
-                        </div>
-                        <p class="text-gray-600">"Köpeğim kaybolduğunda 2 saat içinde bulundu. Harika bir sistem!"</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-6 shadow-lg">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center mr-4">
-                                <span class="text-xl">👨</span>
-                            </div>
-                            <div>
-                                <h5 class="font-semibold">Mehmet S.</h5>
-                                <div class="text-yellow-400">⭐⭐⭐⭐⭐</div>
-                            </div>
-                        </div>
-                        <p class="text-gray-600">"NFC teknolojisi çok pratik. Telefonu yaklaştırınca hemen açılıyor."</p>
-                    </div>
-                    <div class="bg-white rounded-lg p-6 shadow-lg">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center mr-4">
-                                <span class="text-xl">👩</span>
-                            </div>
-                            <div>
-                                <h5 class="font-semibold">Zeynep T.</h5>
-                                <div class="text-yellow-400">⭐⭐⭐⭐⭐</div>
-                            </div>
-                        </div>
-                        <p class="text-gray-600">"İstatistikleri görmek çok güzel. Kedimi kaç kişinin gördüğünü biliyorum."</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<body class="bg-gray-100">
+    <!-- Kayıt  / Giriş Ekranı -->
+    <div id="authSection" class="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
+        <h2 class="text-2xl font-bold mb-4">Kayıt Ol / Giriş Yap</h2>
+        <input type="email" id="emailInput" placeholder="E-posta" class="border p-2 w-full mb-2">
+        <input type="password" id="passwordInput" placeholder="Şifre" class="border p-2 w-full mb-2">
+        <button onclick="registerUser()" class="bg-blue-500 text-white p-2 rounded mr-2">Kayıt Ol</button>
+        <button onclick="loginUser()" class="bg-green-500 text-white p-2 rounded">Giriş Yap</button>
+        <p id="authMessage" class="text-red-500 mt-2"></p>
     </div>
 
-    <!-- User Dashboard (Hidden initially) -->
-    <div id="userDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900">Hayvanlarım</h2>
-            <button id="addPetBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">
-                + Yeni Hayvan Ekle
-            </button>
-        </div>
+    <!-- Dashboard (Giriş Sonrası) -->
+    <div id="dashboard" class="hidden max-w-2xl mx-auto mt-10 p-6 bg-white rounded shadow">
+        <h1 class="text-3xl font-bold mb-4">PatiLink Dashboard</h1>
+        <button onclick="logoutUser()" class="bg-red-500 text-white p-2 rounded mb-4">Çıkış Yap</button>
         
-        <div id="petsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Pet cards will be added here -->
+        <!-- Profil Oluştur -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold">Hayvan Profili Oluştur</h2>
+            <input type="text" id="petName" placeholder="Hayvan Adı" class="border p-2 w-full mb-2">
+            <input type="text" id="petBreed" placeholder="Cins" class="border p-2 w-full mb-2">
+            <input type="text" id="ownerPhone" placeholder="Sahip Telefon" class="border p-2 w-full mb-2">
+            <input type="text" id="ownerEmail" placeholder="Sahip E-posta" class="border p-2 w-full mb-2">
+            <button onclick="createPetProfile()" class="bg-blue-500 text-white p-2 rounded">Oluştur</button>
         </div>
+
+        <!-- Profiller Listesi ve İstatistikler -->
+        <div id="petList"></div>
     </div>
 
-    <!-- Pet Profile View (Hidden initially) -->
-    <div id="petProfileView" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
-        <div id="petProfileContent">
-            <!-- Pet profile content will be loaded here -->
-        </div>
-    </div>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold mb-6 text-center">Giriş Yap</h3>
-            <form id="loginForm">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">E-posta</label>
-                    <input type="email" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Şifre</label>
-                    <input type="password" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
-                    Giriş Yap
-                </button>
-            </form>
-            <button id="closeLoginModal" class="mt-4 w-full text-gray-500 hover:text-gray-700">İptal</button>
-        </div>
-    </div>
-
-    <!-- Register Modal -->
-    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold mb-6 text-center">Üye Ol</h3>
-            <form id="registerForm">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Ad Soyad</label>
-                    <input type="text" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">E-posta</label>
-                    <input type="email" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Telefon</label>
-                    <input type="tel" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Şifre</label>
-                    <input type="password" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
-                    Üye Ol
-                </button>
-            </form>
-            <button id="closeRegisterModal" class="mt-4 w-full text-gray-500 hover:text-gray-700">İptal</button>
-        </div>
-    </div>
-
-    <!-- Add Pet Modal -->
-    <div id="addPetModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-3xl font-bold mb-8 text-center">🐾 Yeni Hayvan Profili Oluştur</h3>
-            
-            <!-- Tab Navigation -->
-            <div class="flex mb-8 bg-gray-100 rounded-lg p-1">
-                <button type="button" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium active" onclick="switchTab('basic')">
-                    📝 Temel Bilgiler
-                </button>
-                <button type="button" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium" onclick="switchTab('media')">
-                    📸 Medya & Sosyal
-                </button>
-                <button type="button" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium" onclick="switchTab('health')">
-                    🏥 Sağlık & Veteriner
-                </button>
-                <button type="button" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium" onclick="switchTab('extra')">
-                    ➕ Ek Bilgiler
-                </button>
-            </div>
-
-            <form id="addPetForm">
-                <!-- Basic Info Tab -->
-                <div id="basicTab" class="tab-content">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Hayvan Adı *</label>
-                            <input type="text" name="petName" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required placeholder="Örn: Karamel">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tür *</label>
-                            <select name="petType" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                                <option value="">Seçiniz</option>
-                                <option value="köpek">🐕 Köpek</option>
-                                <option value="kedi">🐱 Kedi</option>
-                                <option value="kuş">🐦 Kuş</option>
-                                <option value="hamster">🐹 Hamster</option>
-                                <option value="tavşan">🐰 Tavşan</option>
-                                <option value="balık">🐠 Balık</option>
-                                <option value="diğer">🐾 Diğer</option>
-                            </select>
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Cinsi</label>
-                            <input type="text" name="breed" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Örn: Golden Retriever">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Doğum Tarihi</label>
-                            <input type="date" name="birthDate" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Cinsiyet</label>
-                            <select name="gender" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
-                                <option value="">Seçiniz</option>
-                                <option value="erkek">♂️ Erkek</option>
-                                <option value="dişi">♀️ Dişi</option>
-                            </select>
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Renk/Desen</label>
-                            <input type="text" name="color" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Örn: Altın sarısı, beyaz göğüslü">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Ağırlık (kg)</label>
-                            <input type="number" name="weight" step="0.1" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Örn: 25.5">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Mikroçip Numarası</label>
-                            <input type="text" name="microchip" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="15 haneli mikroçip numarası">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Genel Açıklama</label>
-                        <textarea name="description" rows="4" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Hayvanınızın karakteri, alışkanlıkları, sevdiği şeyler..."></textarea>
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Kısırlaştırma Durumu</label>
-                            <select name="neutered" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
-                                <option value="">Seçiniz</option>
-                                <option value="evet">✅ Kısırlaştırıldı</option>
-                                <option value="hayır">❌ Kısırlaştırılmadı</option>
-                            </select>
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Çocuklarla İlişkisi</label>
-                            <select name="childFriendly" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
-                                <option value="">Seçiniz</option>
-                                <option value="çok-iyi">😍 Çok iyi</option>
-                                <option value="iyi">😊 İyi</option>
-                                <option value="orta">😐 Orta</option>
-                                <option value="dikkatli">⚠️ Dikkatli olunmalı</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Media & Social Tab -->
-                <div id="mediaTab" class="tab-content hidden">
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Profil Fotoğrafı</label>
-                        <input type="url" name="photo" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 mb-2" placeholder="Ana profil fotoğrafı URL'si">
-                        <p class="text-sm text-gray-500">Ana profil fotoğrafı olarak kullanılacak</p>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Ek Fotoğraflar</label>
-                        <div id="photoGallery" class="mb-4">
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="photoList">
-                                <!-- Photos will be added here -->
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="url" id="newPhotoUrl" class="form-input flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Fotoğraf URL'si ekle">
-                            <button type="button" onclick="addPhoto()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg">Ekle</button>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Video Linkleri</label>
-                        <div id="videoList" class="space-y-2 mb-4">
-                            <!-- Videos will be added here -->
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="url" id="newVideoUrl" class="form-input flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="YouTube, Instagram video linki">
-                            <button type="button" onclick="addVideo()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg">Ekle</button>
-                        </div>
-                    </div>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Instagram Profili</label>
-                            <input type="url" name="instagram" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="https://instagram.com/username">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Facebook Profili</label>
-                            <input type="url" name="facebook" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="https://facebook.com/username">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">TikTok Profili</label>
-                            <input type="url" name="tiktok" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="https://tiktok.com/@username">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">YouTube Kanalı</label>
-                            <input type="url" name="youtube" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="https://youtube.com/channel/...">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Health & Vet Tab -->
-                <div id="healthTab" class="tab-content hidden">
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Sağlık Durumu</label>
-                        <textarea name="health" rows="4" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Kronik hastalıklar, alerjiler, sürekli kullandığı ilaçlar..."></textarea>
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Son Aşı Tarihi</label>
-                            <input type="date" name="lastVaccination" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Sonraki Aşı Tarihi</label>
-                            <input type="date" name="nextVaccination" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
-                        </div>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Veteriner Bilgileri</label>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <input type="text" name="vetName" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Veteriner adı">
-                            <input type="tel" name="vetPhone" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Veteriner telefonu">
-                        </div>
-                        <input type="text" name="vetAddress" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 mt-2" placeholder="Veteriner adresi">
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Acil Durum Talimatları</label>
-                        <textarea name="emergencyInstructions" rows="3" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Acil durumda yapılması gerekenler, özel talimatlar..."></textarea>
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Kan Grubu</label>
-                            <input type="text" name="bloodType" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Kan grubu (biliniyorsa)">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Sigorta Bilgileri</label>
-                            <input type="text" name="insurance" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Pet sigortası var mı?">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Extra Info Tab -->
-                <div id="extraTab" class="tab-content hidden">
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Beslenme Bilgileri</label>
-                        <textarea name="feeding" rows="3" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Mama markası, beslenme saatleri, özel diyet..."></textarea>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Davranış Özellikleri</label>
-                        <textarea name="behavior" rows="3" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Karakteri, alışkanlıkları, korkuları, sevdiği oyunlar..."></textarea>
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Favori Oyuncağı</label>
-                            <input type="text" name="favoriteToy" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="En sevdiği oyuncak">
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Favori Yemeği</label>
-                            <input type="text" name="favoriteFood" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="En sevdiği yemek/ödül">
-                        </div>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Özel Notlar</label>
-                        <textarea name="specialNotes" rows="3" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Bulan kişinin bilmesi gereken özel durumlar..."></textarea>
-                    </div>
-
-                    <div id="customFields" class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Özel Alanlar</label>
-                        <div id="customFieldsList" class="space-y-2 mb-4">
-                            <!-- Custom fields will be added here -->
-                        </div>
-                        <button type="button" id="addCustomField" class="text-purple-600 hover:text-purple-800 text-sm font-medium">+ Yeni Alan Ekle</button>
-                    </div>
-
-
-                </div>
-                
-                <div class="flex gap-4 mt-8">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
-                        🐾 Profili Oluştur
-                    </button>
-                    <button type="button" id="closeAddPetModal" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 rounded-lg text-lg">
-                        İptal
-                    </button>
-                </div>
-            </form>
-        </div>
+    <!-- Ziyaretçi Sayfası (NFC Linki Açılınca) -->
+    <div id="visitorPage" class="hidden max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
+        <h2 id="visitorPetName" class="text-2xl font-bold mb-4"></h2>
+        <p id="visitorPetInfo"></p>
+        <button onclick="callOwner()" class="bg-red-500 text-white p-2 rounded mt-4">Sahibi Ara</button>
+        <button onclick="sendLocationToOwner()" class="bg-green-500 text-white p-2 rounded mt-4">Konumumu Gönder</button>
+        <div id="notification" class="mt-4"></div>
     </div>
 
     <script>
-        // Global state
+        // Kullanıcı Sistemi
         let currentUser = null;
-        let pets = {};
-        let currentPet = null;
-        let petStats = {};
-        let currentTab = 'basic';
-        let photoGallery = [];
-        let videoGallery = [];
+        const usersKey = 'patilink_users';
+        const currentUserKey = 'patilink_current_user';
+        const petsKey = 'patilink_pets'; // Tüm pet'ler kullanıcıya bağlı
+        let petStats = {}; // {petId: {views:0, calls:0, locations:[]}}
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load data from localStorage first
-            loadDataFromStorage();
+        function getUsers() {
+            return JSON.parse(localStorage.getItem(usersKey)) || {};
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(usersKey, JSON.stringify(users));
+        }
+
+        function registerUser() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            if (!email || !password) return showAuthMessage('Boş alan bırakma!');
             
-            // Check if viewing a pet profile from URL
+            const users = getUsers();
+            if (users[email]) return showAuthMessage('Bu e-posta kayıtlı!');
+            
+            users[email] = { password, pets: [] };
+            saveUsers(users);
+            showAuthMessage('Kayıt başarılı! Giriş yap.', 'green');
+        }
+
+        function loginUser() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const users = getUsers();
+            if (users[email] && users[email].password === password) {
+                currentUser = email;
+                localStorage.setItem(currentUserKey, email);
+                loadDashboard();
+                showAuthMessage('Giriş başarılı!', 'green');
+            } else {
+                showAuthMessage('Hatalı e-posta/şifre!');
+            }
+        }
+
+        function logoutUser() {
+            currentUser = null;
+            localStorage.removeItem(currentUserKey);
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('visitorPage').classList.add('hidden');
+        }
+
+        function showAuthMessage(msg, color = 'red') {
+            const el = document.getElementById('authMessage');
+            el.textContent = msg;
+            el.style.color = color;
+        }
+
+        // Dashboard Yükle
+        function loadDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            const users = getUsers();
+            const userPets = users[currentUser].pets;
+            petStats = JSON.parse(localStorage.getItem('patilink_stats')) || {};
+            
+            const petListEl = document.getElementById('petList');
+            petListEl.innerHTML = '<h2 class="text-xl font-semibold mt-6">Profillerim</h2>';
+            userPets.forEach(pet => {
+                const stats = petStats[pet.id] || { views: 0, calls: 0, locations: [] };
+                petListEl.innerHTML += `
+                    <div class="border p-4 mb-4 rounded">
+                        <p><strong>${pet.name}</strong> - Link: <a href="?pet=${pet.id}" target="_blank">Aç</a></p>
+                        <p>Görüntülenme: ${stats.views}, Aramalar: ${stats.calls}</p>
+                        <button onclick="showPetStats('${pet.id}')" class="bg-gray-500 text-white p-1 rounded text-sm">İstatistik Gör</button>
+                    </div>
+                `;
+            });
+        }
+
+        // Profil Oluştur
+        function createPetProfile() {
+            if (!currentUser) return;
+            const name = document.getElementById('petName').value;
+            const breed = document.getElementById('petBreed').value;
+            const phone = document.getElementById('ownerPhone').value;
+            const email = document.getElementById('ownerEmail').value;
+            if (!name || !phone) return alert('Ad ve telefon zorunlu!');
+
+            const petId = Date.now().toString();
+            const pet = { id: petId, name, breed, phone, email, owner: currentUser };
+
+            const users = getUsers();
+            users[currentUser].pets.push(pet);
+            saveUsers(users);
+            if (!petStats[petId]) petStats[petId] = { views: 0, calls: 0, locations: [] };
+            localStorage.setItem('patilink_stats', JSON.stringify(petStats));
+
+            alert('Profil oluşturuldu! Link: ?pet=' + petId);
+            loadDashboard();
+        }
+
+        // İstatistik Göster (Modal Simülasyonu)
+        function showPetStats(petId) {
+            const stats = petStats[petId];
+            const locationsHtml = stats.locations.slice(-5).map(loc => `
+                <div class="text-sm">
+                    ${new Date(loc.timestamp).toLocaleString('tr-TR')} - ${loc.name} (IP: ${loc.ip || 'Bilinmiyor'}, Koordinat: ${loc.lat},${loc.lng})
+                </div>
+            `).join('');
+            alert(`Görüntülenme: ${stats.views}\nAramalar: ${stats.calls}\nSon Konumlar:\n${locationsHtml || 'Yok'}`);
+        }
+
+        // Sayfa Yüklenme (URL'den pet kontrol)
+        window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const petId = urlParams.get('pet');
-            
             if (petId) {
-                showPetProfile(petId);
-            } else if (currentUser) {
-                // If user is logged in, show dashboard
-                showUserDashboard();
+                loadVisitorPage(petId);
+            } else {
+                const savedUser = localStorage.getItem(currentUserKey);
+                if (savedUser) {
+                    currentUser = savedUser;
+                    loadDashboard();
+                }
             }
-            
-            initializeEventListeners();
-        });
+            petStats = JSON.parse(localStorage.getItem('patilink_stats')) || {};
+        };
 
-        function initializeEventListeners() {
-            // Modal controls
-            document.getElementById('loginBtn').addEventListener('click', () => showModal('loginModal'));
-            document.getElementById('registerBtn').addEventListener('click', () => showModal('registerModal'));
-            document.getElementById('addPetBtn').addEventListener('click', () => showModal('addPetModal'));
-            
-            // Close modal buttons
-            document.getElementById('closeLoginModal').addEventListener('click', () => hideModal('loginModal'));
-            document.getElementById('closeRegisterModal').addEventListener('click', () => hideModal('registerModal'));
-            document.getElementById('closeAddPetModal').addEventListener('click', () => hideModal('addPetModal'));
-            
-            // Form submissions
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('registerForm').addEventListener('submit', handleRegister);
-            document.getElementById('addPetForm').addEventListener('submit', handleAddPet);
-            
-            // Custom fields
-            document.getElementById('addCustomField').addEventListener('click', addCustomField);
-            
-            // Close modals on backdrop click
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.classList.add('hidden');
-                    }
-                });
+        // Ziyaretçi Sayfası Yükle
+        function loadVisitorPage(petId) {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('visitorPage').classList.remove('hidden');
+
+            // Pet verisini bul (tüm kullanıcıları tara - basitlik için)
+            const users = getUsers();
+            let pet = null;
+            Object.values(users).forEach(user => {
+                const found = user.pets.find(p => p.id === petId);
+                if (found) pet = found;
             });
-        }
+            if (!pet) return showNotification('Profil bulunamadı!', 'error');
 
-        function showModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-        }
+            currentPet = pet; // Global
+            document.getElementById('visitorPetName').textContent = pet.name;
+            document.getElementById('visitorPetInfo').textContent = `${pet.breed} - Sahip: ${pet.email || 'Bilinmiyor'}`;
 
-        function hideModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = e.target.elements[0].value;
-            // Simulate login - user-specific data
-            currentUser = email;  // Use email as user ID
-            
-            // Load user-specific data
-            loadUserData();
-            
-            hideModal('loginModal');
-            showUserDashboard();
-        }
-
-        function handleRegister(e) {
-            e.preventDefault();
-            const email = e.target.elements[1].value;
-            // Simulate registration
-            currentUser = email;  // Use email as user ID
-            
-            // Initialize empty user data
-            if (!localStorage.getItem(`patilink_${currentUser}`)) {
-                saveUserData();
-            }
-            
-            hideModal('registerModal');
-            showUserDashboard();
-        }
-
-        function showUserDashboard() {
-            document.getElementById('welcomeSection').classList.add('hidden');
-            document.getElementById('userDashboard').classList.remove('hidden');
-            document.getElementById('petProfileView').classList.add('hidden');
-            
-            // Update navigation
-            document.getElementById('loginBtn').textContent = 'Çıkış Yap';
-            document.getElementById('loginBtn').onclick = logout;
-            document.getElementById('registerBtn').style.display = 'none';
-            
-            renderPetsList();
-        }
-
-        function logout() {
-            currentUser = null;
-            
-            // Reset navigation
-            document.getElementById('welcomeSection').classList.remove('hidden');
-            document.getElementById('userDashboard').classList.add('hidden');
-            document.getElementById('petProfileView').classList.add('hidden');
-            
-            document.getElementById('loginBtn').textContent = 'Giriş Yap';
-            document.getElementById('loginBtn').onclick = () => showModal('loginModal');
-            document.getElementById('registerBtn').style.display = 'block';
-        }
-
-        function handleAddPet(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const petId = Date.now();
-            const newPet = {
-                id: petId,
-                name: formData.get('petName'),
-                type: formData.get('petType'),
-                breed: formData.get('breed'),
-                birthDate: formData.get('birthDate'),
-                gender: formData.get('gender'),
-                color: formData.get('color'),
-                weight: formData.get('weight'),
-                microchip: formData.get('microchip'),
-                description: formData.get('description'),
-                neutered: formData.get('neutered'),
-                childFriendly: formData.get('childFriendly'),
-                
-                // Media
-                photo: formData.get('photo'),
-                photoGallery: [...photoGallery],
-                videoGallery: [...videoGallery],
-                instagram: formData.get('instagram'),
-                facebook: formData.get('facebook'),
-                tiktok: formData.get('tiktok'),
-                youtube: formData.get('youtube'),
-                
-                // Health
-                health: formData.get('health'),
-                lastVaccination: formData.get('lastVaccination'),
-                nextVaccination: formData.get('nextVaccination'),
-                vetName: formData.get('vetName'),
-                vetPhone: formData.get('vetPhone'),
-                vetAddress: formData.get('vetAddress'),
-                emergencyInstructions: formData.get('emergencyInstructions'),
-                bloodType: formData.get('bloodType'),
-                insurance: formData.get('insurance'),
-                
-                // Extra info
-                feeding: formData.get('feeding'),
-                behavior: formData.get('behavior'),
-                favoriteToy: formData.get('favoriteToy'),
-                favoriteFood: formData.get('favoriteFood'),
-                specialNotes: formData.get('specialNotes'),
-
-                
-                customFields: getCustomFields(),
-                owner: currentUser,  // Store owner email as ID
-                link: `${window.location.origin}${window.location.pathname}?pet=${petId}`,
-                createdAt: new Date()
-            };
-            
-            pets[petId] = newPet;
+            // Görüntülenme say
             if (!petStats[petId]) petStats[petId] = { views: 0, calls: 0, locations: [] };
-            
-            // Save user-specific data
-            saveUserData();
-            
-            hideModal('addPetModal');
-            renderPetsList();
-            showNotification('Hayvan profili başarıyla oluşturuldu!', 'success');
-            
-            // Reset form and galleries
-            e.target.reset();
-            document.getElementById('customFieldsList').innerHTML = '';
-            photoGallery = [];
-            videoGallery = [];
-            renderPhotoGallery();
-            renderVideoGallery();
-            
-            // Reset to first tab
-            switchTabProgrammatically('basic');
+            petStats[petId].views++;
+            localStorage.setItem('patilink_stats', JSON.stringify(petStats));
         }
 
-        function switchTabProgrammatically(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
-            });
-            
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            document.getElementById(tabName + 'Tab').classList.remove('hidden');
-            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
-            currentTab = tabName;
+        let currentPet = null;
+
+        // Bildirim Göster
+        function showNotification(msg, type = 'info') {
+            const el = document.getElementById('notification');
+            el.textContent = msg;
+            el.className = `mt-4 p-2 rounded ${type === 'success' ? 'bg-green-200' : type === 'error' ? 'bg-red-200' : 'bg-blue-200'}`;
         }
 
-        function getCustomFields() {
-            const customFields = [];
-            const fieldInputs = document.querySelectorAll('#customFieldsList .custom-field-group');
-            
-            fieldInputs.forEach(group => {
-                const label = group.querySelector('input[placeholder="Alan adı"]').value;
-                const value = group.querySelector('input[placeholder="Değer"]').value;
-                if (label && value) {
-                    customFields.push({ label, value });
-                }
-            });
-            
-            return customFields;
+        // Sahibi Ara
+        async function callOwner() {
+            if (!currentPet) return;
+            petStats[currentPet.id].calls++;
+            localStorage.setItem('patilink_stats', JSON.stringify(petStats));
+            window.location.href = `tel:${currentPet.phone}`;
+            await addLocationToStats(); // Konum ekle
+            showNotification('Arama yapılıyor ve konum gönderildi!', 'success');
         }
 
-        function addCustomField() {
-            const customFieldsList = document.getElementById('customFieldsList');
-            const fieldGroup = document.createElement('div');
-            fieldGroup.className = 'custom-field-group flex gap-2 mb-2';
-            fieldGroup.innerHTML = `
-                <input type="text" placeholder="Alan adı" class="form-input flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
-                <input type="text" placeholder="Değer" class="form-input flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700 px-2">×</button>
-            `;
-            customFieldsList.appendChild(fieldGroup);
-        }
-
-        function renderPetsList() {
-            const petsList = document.getElementById('petsList');
-            petsList.innerHTML = '';
-            
-            Object.values(pets).forEach(pet => {
-                const stats = petStats[pet.id] || { views: 0, calls: 0 };
-                const petCard = document.createElement('div');
-                petCard.className = 'pet-card bg-white rounded-lg shadow-lg overflow-hidden';
-                petCard.innerHTML = `
-                    <div class="h-48 bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center">
-                        ${pet.photo ? 
-                            `<img src="${pet.photo}" alt="${pet.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                             <div class="text-6xl hidden">🐾</div>` :
-                            `<div class="text-6xl">🐾</div>`
-                        }
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">${pet.name}</h3>
-                        <p class="text-gray-600 mb-4">${pet.type} • ${pet.breed || 'Melez'}</p>
-                        
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="stats-card text-white p-3 rounded-lg text-center">
-                                <div class="text-2xl font-bold">${stats.views}</div>
-                                <div class="text-sm">Görüntülenme</div>
-                            </div>
-                            <div class="location-card text-white p-3 rounded-lg text-center">
-                                <div class="text-2xl font-bold">${stats.calls}</div>
-                                <div class="text-sm">Arama</div>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <button onclick="copyPetLink('${pet.link}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm">
-                                📋 Linki Kopyala
-                            </button>
-                            <button onclick="viewPetProfile(${pet.id})" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm">
-                                👁️ Profili Görüntüle
-                            </button>
-                            <button onclick="showPetStats(${pet.id})" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-sm">
-                                📊 İstatistikler
-                            </button>
-                        </div>
-                    </div>
-                `;
-                petsList.appendChild(petCard);
-            });
-        }
-
-        function copyPetLink(link) {
-            navigator.clipboard.writeText(link).then(() => {
-                showNotification('Link kopyalandı!', 'success');
-            });
-        }
-
-        function viewPetProfile(petId) {
-            const pet = pets[petId];
-            if (pet) {
-                showPetProfile(petId, true);
-            }
-        }
-
-        function showPetProfile(petId, isOwner = false) {
-            const pet = pets[petId];
-            if (!pet) return;
-            
-            currentPet = pet;
-            
-            // Increment view count if not owner
-            if (!isOwner) {
-                if (!petStats[pet.id]) petStats[pet.id] = { views: 0, calls: 0, locations: [] };
-                petStats[pet.id].views++;
-                // Since public view is global for demo, save to a global key or assume shared
-                // For simplicity in local demo, save globally
-                savePublicStats();
-            }
-            
-            document.getElementById('welcomeSection').classList.add('hidden');
-            document.getElementById('userDashboard').classList.add('hidden');
-            document.getElementById('petProfileView').classList.remove('hidden');
-            
-            renderPetProfile(pet, isOwner);
-        }
-
-        function renderPetProfile(pet, isOwner) {
-            const profileContent = document.getElementById('petProfileContent');
-            const age = pet.birthDate ? calculateAge(pet.birthDate) : null;
-            
-            profileContent.innerHTML = `
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <!-- Header with photo -->
-                    <div class="h-80 bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center relative">
-                        ${pet.photo ? 
-                            `<img src="${pet.photo}" alt="${pet.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                             <div class="text-8xl hidden">🐾</div>` :
-                            `<div class="text-8xl">🐾</div>`
-                        }
-                        ${isOwner ? `<button onclick="showUserDashboard()" class="absolute top-4 left-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg">← Geri</button>` : ''}
-                        
-                        <!-- Emergency overlay for lost pets -->
-                        ${!isOwner ? `
-                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
-                            <div class="text-white text-center">
-                                <h1 class="text-4xl font-bold mb-2">${pet.name}</h1>
-                                <p class="text-xl">${pet.type} • ${pet.breed || 'Melez'}</p>
-
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                    
-                    <div class="p-8">
-                        ${isOwner ? `
-                        <div class="text-center mb-8">
-                            <h1 class="text-4xl font-bold mb-2">${pet.name}</h1>
-                            <p class="text-xl text-gray-600">${pet.type} • ${pet.breed || 'Melez'}</p>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Emergency Action Buttons -->
-                        ${!isOwner ? `
-                        <div class="grid md:grid-cols-3 gap-4 mb-8">
-                            <button onclick="callOwner()" class="emergency-button text-white py-4 px-6 rounded-lg text-lg font-semibold hover:shadow-lg transition-all">
-                                📞 ACİL ARAMA
-                            </button>
-                            <button onclick="getDirections()" class="bg-blue-500 hover:bg-blue-600 text-white py-4 px-6 rounded-lg text-lg font-semibold">
-                                📍 Eve Yönlendir
-                            </button>
-                            <button onclick="sendLocationToOwner()" class="bg-green-500 hover:bg-green-600 text-white py-4 px-6 rounded-lg text-lg font-semibold">
-                                📍 Konumumu Gönder
-                            </button>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Photo Gallery -->
-                        ${pet.photoGallery && pet.photoGallery.length > 0 ? `
-                        <div class="mb-8">
-                            <h3 class="text-2xl font-semibold mb-4">📸 Fotoğraf Galerisi</h3>
-                            <div class="image-gallery">
-                                ${pet.photoGallery.map(photo => `
-                                    <div class="gallery-item">
-                                        <img src="${photo}" alt="${pet.name}" class="w-full h-full object-cover" onclick="openImageModal('${photo}')" onerror="this.style.display='none';">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Basic Info Grid -->
-                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl">
-                                <h3 class="text-xl font-semibold mb-4 text-blue-800">🐾 Temel Bilgiler</h3>
-                                <div class="space-y-3">
-                                    ${age ? `<div><span class="font-medium">Yaş:</span> ${age}</div>` : ''}
-                                    ${pet.gender ? `<div><span class="font-medium">Cinsiyet:</span> ${pet.gender === 'erkek' ? '♂️ Erkek' : '♀️ Dişi'}</div>` : ''}
-                                    ${pet.color ? `<div><span class="font-medium">Renk:</span> ${pet.color}</div>` : ''}
-                                    ${pet.weight ? `<div><span class="font-medium">Ağırlık:</span> ${pet.weight} kg</div>` : ''}
-                                    ${pet.microchip ? `<div><span class="font-medium">Mikroçip:</span> ${pet.microchip}</div>` : ''}
-                                    ${pet.neutered ? `<div><span class="font-medium">Kısırlaştırma:</span> ${pet.neutered === 'evet' ? '✅ Evet' : '❌ Hayır'}</div>` : ''}
-                                </div>
-                            </div>
-                            
-                            <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl">
-                                <h3 class="text-xl font-semibold mb-4 text-green-800">📞 İletişim</h3>
-                                <div class="space-y-3">
-                                    <div><span class="font-medium">Sahip:</span> ${pet.owner}</div>
-                                    <!-- Phone and other owner details would need to be stored; simplified for demo -->
-                                </div>
-                            </div>
-                            
-                            ${pet.vetName ? `
-                            <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl">
-                                <h3 class="text-xl font-semibold mb-4 text-red-800">🏥 Veteriner</h3>
-                                <div class="space-y-3">
-                                    <div><span class="font-medium">Veteriner:</span> ${pet.vetName}</div>
-                                    ${pet.vetPhone ? `<div><span class="font-medium">Telefon:</span> ${pet.vetPhone}</div>` : ''}
-                                    ${pet.vetAddress ? `<div><span class="font-medium">Adres:</span> ${pet.vetAddress}</div>` : ''}
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                        
-                        <!-- Description -->
-                        ${pet.description ? `
-                        <div class="mb-8 bg-purple-50 p-6 rounded-xl">
-                            <h3 class="text-xl font-semibold mb-4 text-purple-800">📝 Açıklama</h3>
-                            <p class="text-gray-700 leading-relaxed">${pet.description}</p>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Health Information -->
-                        ${pet.health || pet.emergencyInstructions ? `
-                        <div class="mb-8 bg-red-50 p-6 rounded-xl border-l-4 border-red-400">
-                            <h3 class="text-xl font-semibold mb-4 text-red-800">🚨 Önemli Sağlık Bilgileri</h3>
-                            ${pet.health ? `<div class="mb-4"><strong>Sağlık Durumu:</strong> ${pet.health}</div>` : ''}
-                            ${pet.emergencyInstructions ? `<div class="mb-4"><strong>Acil Durum Talimatları:</strong> ${pet.emergencyInstructions}</div>` : ''}
-                            ${pet.lastVaccination ? `<div class="mb-2"><strong>Son Aşı:</strong> ${formatDate(pet.lastVaccination)}</div>` : ''}
-                            ${pet.bloodType ? `<div><strong>Kan Grubu:</strong> ${pet.bloodType}</div>` : ''}
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Behavior & Preferences -->
-                        ${pet.behavior || pet.favoriteToy || pet.favoriteFood ? `
-                        <div class="mb-8 bg-yellow-50 p-6 rounded-xl">
-                            <h3 class="text-xl font-semibold mb-4 text-yellow-800">🎾 Karakter & Tercihler</h3>
-                            ${pet.behavior ? `<div class="mb-4"><strong>Davranış:</strong> ${pet.behavior}</div>` : ''}
-                            ${pet.favoriteToy ? `<div class="mb-2"><strong>Favori Oyuncağı:</strong> ${pet.favoriteToy}</div>` : ''}
-                            ${pet.favoriteFood ? `<div class="mb-2"><strong>Favori Yemeği:</strong> ${pet.favoriteFood}</div>` : ''}
-                            ${pet.childFriendly ? `<div><strong>Çocuklarla İlişkisi:</strong> ${getChildFriendlyText(pet.childFriendly)}</div>` : ''}
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Special Notes -->
-                        ${pet.specialNotes ? `
-                        <div class="mb-8 bg-orange-50 p-6 rounded-xl border-l-4 border-orange-400">
-                            <h3 class="text-xl font-semibold mb-4 text-orange-800">⚠️ Özel Notlar</h3>
-                            <p class="text-gray-700">${pet.specialNotes}</p>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Videos -->
-                        ${pet.videoGallery && pet.videoGallery.length > 0 ? `
-                        <div class="mb-8">
-                            <h3 class="text-xl font-semibold mb-4">🎥 Video Galerisi</h3>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                ${pet.videoGallery.map(video => `
-                                    <div class="bg-gray-100 p-4 rounded-lg">
-                                        <a href="${video}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 flex items-center">
-                                            <span class="text-2xl mr-3">🎥</span>
-                                            Video İzle
-                                        </a>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Social Media -->
-                        ${(pet.instagram || pet.facebook || pet.tiktok || pet.youtube) ? `
-                        <div class="mb-8">
-                            <h3 class="text-xl font-semibold mb-4">📱 Sosyal Medya</h3>
-                            <div class="flex flex-wrap gap-4">
-                                ${pet.instagram ? `<a href="${pet.instagram}" target="_blank" rel="noopener noreferrer" class="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg flex items-center"><span class="mr-2">📷</span>Instagram</a>` : ''}
-                                ${pet.facebook ? `<a href="${pet.facebook}" target="_blank" rel="noopener noreferrer" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center"><span class="mr-2">👥</span>Facebook</a>` : ''}
-                                ${pet.tiktok ? `<a href="${pet.tiktok}" target="_blank" rel="noopener noreferrer" class="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-lg flex items-center"><span class="mr-2">🎵</span>TikTok</a>` : ''}
-                                ${pet.youtube ? `<a href="${pet.youtube}" target="_blank" rel="noopener noreferrer" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center"><span class="mr-2">📺</span>YouTube</a>` : ''}
-                            </div>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- Custom Fields -->
-                        ${pet.customFields && pet.customFields.length > 0 ? `
-                        <div class="mb-8">
-                            <h3 class="text-xl font-semibold mb-4">ℹ️ Ek Bilgiler</h3>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                ${pet.customFields.map(field => `
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <span class="font-medium text-gray-800">${field.label}:</span>
-                                        <span class="text-gray-600 ml-2">${field.value}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                        
-                        <!-- QR Code for sharing -->
-                        ${isOwner ? `
-                        <div class="text-center bg-gradient-to-r from-purple-100 to-pink-100 p-8 rounded-xl">
-                            <h3 class="text-xl font-semibold mb-4">📱 NFC/QR Kod</h3>
-                            <div class="qr-code inline-block">
-                                <div class="text-white text-6xl">📱</div>
-                            </div>
-                            <p class="mt-4 text-gray-600">Bu linki NFC tag'ınıza yazın</p>
-                            <div class="mt-4 bg-white p-3 rounded-lg border">
-                                <code class="text-sm break-all">${pet.link}</code>
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Helper functions
-        function calculateAge(birthDate) {
-            const birth = new Date(birthDate);
-            const today = new Date();
-            const years = today.getFullYear() - birth.getFullYear();
-            const months = today.getMonth() - birth.getMonth();
-            
-            if (years > 0) {
-                return `${years} yaşında`;
-            } else if (months > 0) {
-                return `${months} aylık`;
-            } else {
-                return 'Yavru';
-            }
-        }
-
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('tr-TR');
-        }
-
-        function getChildFriendlyText(level) {
-            const levels = {
-                'çok-iyi': '😍 Çok iyi',
-                'iyi': '😊 İyi',
-                'orta': '😐 Orta',
-                'dikkatli': '⚠️ Dikkatli olunmalı'
-            };
-            return levels[level] || level;
-        }
-
-        function openImageModal(imageSrc) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="max-w-4xl max-h-full p-4">
-                    <img src="${imageSrc}" alt="Pet photo" class="max-w-full max-h-full object-contain rounded-lg">
-                    <button onclick="this.closest('.fixed').remove()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300">×</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-        }
-
-        function sendLocationToOwner() {
+        // Konum Gönder (GPS + IP API)
+        async function sendLocationToOwner() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const geocoder = new google.maps.Geocoder();
-                    const latlng = { lat: position.coords.latitude, lng: position.coords.longitude };
-                    geocoder.geocode({ location: latlng }, (results, status) => {
-                        let locationName = 'Bilinmeyen konum';
-                        if (status === 'OK' && results[0]) {
-                            locationName = results[0].formatted_address;
-                        }
-                    // Save location with name
-                    if (!petStats[currentPet.id]) petStats[currentPet.id] = { views: 0, calls: 0, locations: [] };
-                    petStats[currentPet.id].locations.push({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        name: locationName,
-                        timestamp: new Date()
-                    });
-                    
-                    savePublicStats();
-                    showNotification(`Konumunuz (${locationName}) sahibine gönderildi! Teşekkür ederiz.`, 'success');
-                    });
-                }, () => {
-                    showNotification('Konum erişimi reddedildi.', 'error');
-                });
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    await addLocationToStats(lat, lng);
+                    showNotification('Konum gönderildi!', 'success');
+                }, () => showNotification('Konum erişimi reddedildi.', 'error'));
             } else {
-                showNotification('Tarayıcınız konum desteği vermiyor.', 'error');
+                showNotification('Tarayıcı konum desteklemiyor.', 'error');
             }
         }
 
-        function callOwner() {
-            if (currentPet) {
-                // Increment call count
-                if (!petStats[currentPet.id]) petStats[currentPet.id] = { views: 0, calls: 0, locations: [] };
-                petStats[currentPet.id].calls++;
-                
-                // Get user location and save it
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        const geocoder = new google.maps.Geocoder();
-                        const latlng = { lat: position.coords.latitude, lng: position.coords.longitude };
-                        geocoder.geocode({ location: latlng }, (results, status) => {
-                            let locationName = 'Bilinmeyen konum';
-                            if (status === 'OK' && results[0]) {
-                                locationName = results[0].formatted_address;
-                            }
-                            petStats[currentPet.id].locations.push({
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude,
-                                name: locationName,
-                                timestamp: new Date()
-                            });
-                            savePublicStats();
-                        });
-                    });
-                } else {
-                    savePublicStats();
-                }
-                
-                // For demo, assume phone is stored or alert
-                showNotification('Demo modda arama simüle edildi.', 'success');
-            }
-        }
-
-        function getDirections() {
-            showNotification('Demo modda yönlendirme simüle edildi.', 'success');
-        }
-
-        function showPetStats(petId) {
-            const pet = pets[petId];
-            const stats = petStats[petId] || { views: 0, calls: 0, locations: [] };
-            
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                    <h3 class="text-2xl font-bold mb-6 text-center">${pet.name} İstatistikleri</h3>
-                    
-                    <div class="space-y-4">
-                        <div class="stats-card text-white p-4 rounded-lg text-center">
-                            <div class="text-3xl font-bold">${stats.views}</div>
-                            <div>Toplam Görüntülenme</div>
-                        </div>
-                        
-                        <div class="location-card text-white p-4 rounded-lg text-center">
-                            <div class="text-3xl font-bold">${stats.calls}</div>
-                            <div>Arama Sayısı</div>
-                        </div>
-                        
-                        <div class="bg-gray-100 p-4 rounded-lg text-center">
-                            <div class="text-3xl font-bold">${stats.locations.length}</div>
-                            <div>Konum Paylaşımı</div>
-                        </div>
-                        
-                        ${stats.locations.length > 0 ? `
-                        <div class="mt-4">
-                            <h4 class="font-semibold mb-2">Son Konumlar:</h4>
-                            <div class="max-h-32 overflow-y-auto space-y-1">
-                                ${stats.locations.slice(-5).map(loc => `
-                                    <div class="text-sm text-gray-600">
-                                        ${new Date(loc.timestamp).toLocaleString('tr-TR')} - ${loc.name}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                    
-                    <button onclick="this.closest('.modal').remove()" class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
-                        Kapat
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Close on backdrop click
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-        }
-
-        // Tab switching functionality
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName + 'Tab').classList.remove('hidden');
-            
-            // Add active class to clicked button
-            event.target.classList.add('active');
-            
-            currentTab = tabName;
-        }
-
-        // Photo gallery functions
-        function addPhoto() {
-            const photoUrl = document.getElementById('newPhotoUrl').value.trim();
-            if (!photoUrl) return;
-            
-            photoGallery.push(photoUrl);
-            renderPhotoGallery();
-            document.getElementById('newPhotoUrl').value = '';
-        }
-
-        function renderPhotoGallery() {
-            const photoList = document.getElementById('photoList');
-            photoList.innerHTML = '';
-            
-            photoGallery.forEach((photo, index) => {
-                const photoDiv = document.createElement('div');
-                photoDiv.className = 'gallery-item relative';
-                photoDiv.innerHTML = `
-                    <img src="${photo}" alt="Pet photo" class="w-full h-full object-cover" onerror="this.src=''; this.alt='Resim yüklenemedi';">
-                    <button type="button" onclick="removePhoto(${index})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600">×</button>
-                `;
-                photoList.appendChild(photoDiv);
-            });
-        }
-
-        function removePhoto(index) {
-            photoGallery.splice(index, 1);
-            renderPhotoGallery();
-        }
-
-        // Video gallery functions
-        function addVideo() {
-            const videoUrl = document.getElementById('newVideoUrl').value.trim();
-            if (!videoUrl) return;
-            
-            videoGallery.push(videoUrl);
-            renderVideoGallery();
-            document.getElementById('newVideoUrl').value = '';
-        }
-
-        function renderVideoGallery() {
-            const videoList = document.getElementById('videoList');
-            videoList.innerHTML = '';
-            
-            videoGallery.forEach((video, index) => {
-                const videoDiv = document.createElement('div');
-                videoDiv.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg';
-                videoDiv.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="text-2xl mr-3">🎥</span>
-                        <a href="${video}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 truncate">${video}</a>
-                    </div>
-                    <button type="button" onclick="removeVideo(${index})" class="text-red-500 hover:text-red-700 ml-2">×</button>
-                `;
-                videoList.appendChild(videoDiv);
-            });
-        }
-
-        function removeVideo(index) {
-            videoGallery.splice(index, 1);
-            renderVideoGallery();
-        }
-
-        // Enhanced notification system
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
-                type === 'success' ? 'bg-green-500 text-white' : 
-                type === 'error' ? 'bg-red-500 text-white' : 
-                'bg-blue-500 text-white'
-            }`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Data persistence functions - user specific
-        function saveUserData() {
+        // Konum Ekleme Fonksiyonu (Ortak)
+        async function addLocationToStats(lat = null, lng = null) {
+            if (!currentPet) return;
+            let locationName = 'Bilinmeyen konum';
+            let ip = 'Bilinmiyor';
             try {
-                const userData = {
-                    pets: pets,
-                    petStats: petStats  // Stats are per pet, stored with user for owner view
-                };
-                localStorage.setItem(`patilink_${currentUser}`, JSON.stringify(userData));
+                const response =PC = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=b647e2a9739c445984120017ef0a3884`);
+                const ipData = await response.json();
+                ip = ipData.ip;
+                locationName = ipData.city + ', ' + ipData.country_name;
+                if (ipData.state_prov) locationName += ', ' + ipData.state_prov;
             } catch (error) {
-                console.error('Veri kaydedilemedi:', error);
+                console.error('IP API hatası:', error);
             }
-        }
 
-        function loadUserData() {
-            try {
-                const savedData = localStorage.getItem(`patilink_${currentUser}`);
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    pets = data.pets || {};
-                    petStats = data.petStats || {};
-                } else {
-                    pets = {};
-                    petStats = {};
-                }
-            } catch (error) {
-                console.error('Veri yüklenemedi:', error);
-                pets = {};
-                petStats = {};
-            }
+            if (!petStats[currentPet.id]) petStats[currentPet.id] = { views: 0, calls: 0, locations: [] };
+            petStats[currentPet.id].locations.push({
+                lat: lat || 'GPS yok',
+                lng: lng || 'GPS yok',
+                name: locationName,
+                ip: ip,
+                timestamp: new Date()
+            });
+            localStorage.setItem('patilink_stats', JSON.stringify(petStats));
         }
-
-        function loadDataFromStorage() {
-            // No global load, only per user
-        }
-
-        function savePublicStats() {
-            // For public views/stats, use a separate key or per-pet, but for demo use global for shared access in same browser
-            // In real app, this would be server-side
-            localStorage.setItem('patilink_public_stats', JSON.stringify(petStats));
-        }
-
-        // For public profile views, load stats if needed
-        // In showPetProfile if !isOwner, load from public
-        // Simplified: assume same browser shares via global for demo
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script> <!-- Google Maps API anahtarınızı ekleyin konum adı için -->
 </body>
 </html>
