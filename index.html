@@ -138,6 +138,42 @@
             <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-4">NFC Etiketler İçin Dijital Hayvan Profili</h2>
             <p class="text-lg md:text-xl text-gray-600 mb-4">Evcil hayvanınız için kapsamlı dijital kimlik oluşturun</p>
             <p class="text-base md:text-lg text-gray-500 mb-8">NFC tag'ınıza yazabileceğiniz özel link ile hayvanınızın tüm bilgilerine erişim sağlayın</p>
+            
+            <!-- How It Works -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
+                <h3 class="text-lg font-bold text-purple-800 mb-4">🚀 Nasıl Çalışır?</h3>
+                <div class="space-y-3">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">1️⃣</span>
+                        <div>
+                            <div class="font-medium text-purple-800">Hesap Oluşturun</div>
+                            <div class="text-sm text-purple-600">Ücretsiz kayıt olun ve giriş yapın</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">2️⃣</span>
+                        <div>
+                            <div class="font-medium text-purple-800">Hayvan Profili Oluşturun</div>
+                            <div class="text-sm text-purple-600">Hayvanınızın tüm bilgilerini girin</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">3️⃣</span>
+                        <div>
+                            <div class="font-medium text-purple-800">NFC Tag'a Yazın</div>
+                            <div class="text-sm text-purple-600">Oluşturulan linki NFC tag'ınıza yazın</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">4️⃣</span>
+                        <div>
+                            <div class="font-medium text-purple-800">Takip Edin</div>
+                            <div class="text-sm text-purple-600">Kim ne zaman okutuyor, analitikleri görün</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8 mb-8">
                 <div class="text-center">
                     <div class="text-3xl md:text-4xl mb-2">📱</div>
@@ -154,6 +190,9 @@
                     <p class="text-sm text-gray-600">Hızlı İletişim</p>
                 </div>
             </div>
+            
+
+            
             <button onclick="showRegister()" class="bg-purple-600 text-white px-6 md:px-8 py-3 rounded-lg text-base md:text-lg font-medium hover:bg-purple-700 transition w-full max-w-xs">Hemen Başla</button>
         </div>
 
@@ -537,15 +576,56 @@
     <script>
         // Global variables
         let currentUser = null;
-        let pets = JSON.parse(localStorage.getItem('pets') || '[]');
-        let users = JSON.parse(localStorage.getItem('users') || '[]');
-        let analytics = JSON.parse(localStorage.getItem('analytics') || '{}');
+        let pets = [];
+        let users = [];
+        let analytics = {};
         let uploadedFiles = {};
         let currentTab = 'media';
         let customInfoBoxCount = 0;
 
+        // Clean database - no demo data
+        const CLOUD_DB = {
+            users: [],
+            pets: [],
+            analytics: {}
+        };
+
+        // Load data from cloud database
+        function loadCloudData() {
+            users = [...CLOUD_DB.users];
+            pets = [...CLOUD_DB.pets];
+            analytics = {...CLOUD_DB.analytics};
+            
+            // Also load any local data and merge
+            const localUsers = JSON.parse(localStorage.getItem('users') || '[]');
+            const localPets = JSON.parse(localStorage.getItem('pets') || '[]');
+            const localAnalytics = JSON.parse(localStorage.getItem('analytics') || '{}');
+            
+            // Merge local data with cloud data
+            localUsers.forEach(user => {
+                if (!users.find(u => u.email === user.email)) {
+                    users.push(user);
+                }
+            });
+            
+            localPets.forEach(pet => {
+                if (!pets.find(p => p.id === pet.id)) {
+                    pets.push(pet);
+                }
+            });
+            
+            Object.keys(localAnalytics).forEach(petId => {
+                if (!analytics[petId]) {
+                    analytics[petId] = localAnalytics[petId];
+                }
+            });
+        }
+
         // Initialize app - Check for pet link FIRST
         function init() {
+            // CRITICAL: Load cloud data first so pet links work everywhere
+            loadCloudData();
+            
             // PRIORITY: Check for pet link on page load
             const hash = window.location.hash;
             if (hash.startsWith('#pet=')) {
@@ -577,6 +657,9 @@
 
         // Hash-based routing
         function handleHashChange() {
+            // Reload cloud data on hash change to ensure fresh data
+            loadCloudData();
+            
             const hash = window.location.hash;
             if (hash.startsWith('#pet=')) {
                 const petId = parseInt(hash.replace('#pet=', ''));
@@ -607,17 +690,41 @@
                 return;
             }
             
-            // Track view
+            // Track view with detailed information
             if (!analytics[petId]) {
-                analytics[petId] = { views: 0, calls: 0, locations: 0, viewHistory: [] };
+                analytics[petId] = { views: 0, calls: 0, locations: 0, viewHistory: [], locationHistory: [] };
             }
             analytics[petId].views++;
-            analytics[petId].viewHistory.push({
+            
+            const viewData = {
                 timestamp: new Date().toISOString(),
                 userAgent: navigator.userAgent,
-                location: 'Demo Location'
-            });
-            localStorage.setItem('analytics', JSON.stringify(analytics));
+                referrer: document.referrer || 'Direkt Erişim',
+                screenSize: `${screen.width}x${screen.height}`,
+                language: navigator.language
+            };
+            
+            // Try to get location for view tracking
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        viewData.latitude = position.coords.latitude;
+                        viewData.longitude = position.coords.longitude;
+                        viewData.locationAccuracy = position.coords.accuracy;
+                        analytics[petId].viewHistory.push(viewData);
+                        localStorage.setItem('analytics', JSON.stringify(analytics));
+                    },
+                    function(error) {
+                        viewData.locationError = 'Konum erişimi reddedildi';
+                        analytics[petId].viewHistory.push(viewData);
+                        localStorage.setItem('analytics', JSON.stringify(analytics));
+                    }
+                );
+            } else {
+                viewData.locationError = 'Konum desteklenmiyor';
+                analytics[petId].viewHistory.push(viewData);
+                localStorage.setItem('analytics', JSON.stringify(analytics));
+            }
             
             hideAll();
             const profileDiv = document.getElementById('petProfile');
@@ -855,6 +962,9 @@
         function register(event) {
             event.preventDefault();
             
+            // Ensure we have latest data
+            loadCloudData();
+            
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
             const phone = document.getElementById('registerPhone').value;
@@ -881,11 +991,15 @@
             currentUser = user;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
+            showMessage('Kayıt başarılı! Hoş geldiniz!', 'success');
             showDashboard();
         }
 
         function login(event) {
             event.preventDefault();
+            
+            // Ensure we have latest data
+            loadCloudData();
             
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
@@ -895,9 +1009,10 @@
             if (user) {
                 currentUser = user;
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showMessage('Giriş başarılı!', 'success');
                 showDashboard();
             } else {
-                showMessage('E-posta veya şifre hatalı!', 'error');
+                showMessage('E-posta veya şifre hatalı! Lütfen bilgilerinizi kontrol edin.', 'error');
             }
         }
 
@@ -1283,6 +1398,30 @@
         function trackLocation(petId) {
             if (analytics[petId]) {
                 analytics[petId].locations++;
+                
+                // Get user's location if possible
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const locationData = {
+                                timestamp: new Date().toISOString(),
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                accuracy: position.coords.accuracy
+                            };
+                            
+                            if (!analytics[petId].locationHistory) {
+                                analytics[petId].locationHistory = [];
+                            }
+                            analytics[petId].locationHistory.push(locationData);
+                            localStorage.setItem('analytics', JSON.stringify(analytics));
+                        },
+                        function(error) {
+                            console.log('Konum alınamadı:', error);
+                        }
+                    );
+                }
+                
                 localStorage.setItem('analytics', JSON.stringify(analytics));
             }
             
@@ -1398,9 +1537,12 @@
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
                 <div class="bg-white p-6 rounded-xl max-w-md mx-4">
-                    <h3 class="text-lg font-bold mb-4">Konum Bilgisi</h3>
-                    <p class="text-gray-600 mb-4">Bu özellik demo sürümünde aktif değildir. Gerçek uygulamada harita entegrasyonu ile konum gösterilecektir.</p>
-                    <button onclick="this.parentElement.parentElement.remove()" class="w-full bg-purple-600 text-white py-2 rounded-lg">Tamam</button>
+                    <h3 class="text-lg font-bold mb-4">📍 Konum Görüntüleme</h3>
+                    <p class="text-gray-600 mb-4">Konum bilginiz hayvan sahibi tarafından görülebilir. Bu sayede kayıp hayvanınızı bulduğunuz yer tespit edilebilir.</p>
+                    <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                        <p class="text-sm text-blue-700">💡 <strong>Bilgi:</strong> Konum verileriniz sadece hayvan sahibi tarafından görülür ve güvenlik amacıyla kullanılır.</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="w-full bg-purple-600 text-white py-2 rounded-lg">Anladım</button>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -1436,13 +1578,38 @@
                             <h4 class="font-bold mb-3">Son Görüntülenmeler</h4>
                             <div class="space-y-2 max-h-40 overflow-y-auto">
                                 ${petAnalytics.viewHistory.slice(-10).reverse().map(view => `
-                                    <div class="flex justify-between text-sm bg-gray-50 p-2 rounded">
-                                        <span>${new Date(view.timestamp).toLocaleString('tr-TR')}</span>
-                                        <span class="text-gray-600">${view.location}</span>
+                                    <div class="bg-gray-50 p-3 rounded text-sm">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="font-medium">${new Date(view.timestamp).toLocaleString('tr-TR')}</span>
+                                            <span class="text-xs text-gray-500">${view.screenSize}</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600">
+                                            ${view.latitude ? `📍 Konum: ${view.latitude.toFixed(4)}, ${view.longitude.toFixed(4)}` : '📍 Konum bilgisi yok'}
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            ${view.referrer !== 'Direkt Erişim' ? `🔗 ${view.referrer}` : '🔗 Direkt erişim'}
+                                        </div>
                                     </div>
                                 `).join('') || '<p class="text-gray-500 text-center py-4">Henüz görüntülenme yok</p>'}
                             </div>
                         </div>
+                        
+                        ${petAnalytics.locationHistory && petAnalytics.locationHistory.length > 0 ? `
+                        <div class="mt-4">
+                            <h4 class="font-bold mb-3">Konum Görüntüleme Geçmişi</h4>
+                            <div class="space-y-2 max-h-32 overflow-y-auto">
+                                ${petAnalytics.locationHistory.slice(-5).reverse().map(loc => `
+                                    <div class="bg-green-50 p-2 rounded text-sm">
+                                        <div class="flex justify-between">
+                                            <span>${new Date(loc.timestamp).toLocaleString('tr-TR')}</span>
+                                            <span class="text-green-600">📍 ${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600">Doğruluk: ${Math.round(loc.accuracy)}m</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
                         
                         <div class="mt-6">
                             <p class="text-sm text-gray-600">Link: <code class="bg-gray-100 px-2 py-1 rounded">${pet.link}</code></p>
@@ -1456,5 +1623,5 @@
         // Initialize app on load
         init();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e69e50219b98bc',t:'MTc2MDQ0MDEwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6ad0ff32498bc',t:'MTc2MDQ0MDcwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
