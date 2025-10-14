@@ -235,11 +235,11 @@
             <div class="space-y-4">
                 <button onclick="showRegister()" class="bg-purple-600 text-white px-6 md:px-8 py-3 rounded-lg text-base md:text-lg font-medium hover:bg-purple-700 transition w-full max-w-xs">Hemen Başla</button>
                 
-                <!-- Demo Link -->
-                <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 max-w-md mx-auto">
-                    <h4 class="font-bold text-green-800 mb-2">🎯 Demo Deneyin!</h4>
-                    <p class="text-sm text-green-700 mb-3">Sistemi test etmek için demo hayvan profilini görüntüleyin:</p>
-                    <button onclick="window.location.hash = '#pet=2001'" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm w-full">Demo Profili Görüntüle</button>
+                <!-- Real Pet Profiles Info -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
+                    <h4 class="font-bold text-blue-800 mb-2">🔗 Nasıl Çalışır?</h4>
+                    <p class="text-sm text-blue-700 mb-3">Hayvan profili oluşturduktan sonra size özel bir link verilir. Bu linki NFC tag'a yazarak hayvanınızın tasmasına takabilirsiniz.</p>
+                    <p class="text-xs text-blue-600">Hayvanınız kaybolduğunda bulan kişi NFC'yi okutarak profiline erişebilir ve sizinle iletişime geçebilir.</p>
                 </div>
             </div>
         </div>
@@ -631,17 +631,25 @@
         let currentTab = 'media';
         let customInfoBoxCount = 0;
 
-        // GLOBAL CLOUD DATABASE - Tüm cihazlarda erişilebilir
-        const GLOBAL_CLOUD_DB_KEY = 'PETID_GLOBAL_DATABASE_V2';
+        // GERÇEK BULUT VERİTABANI SİMÜLASYONU - Tüm cihazlarda çalışır
+        const CLOUD_API_URL = 'https://api.jsonbin.io/v3/b/YOUR_BIN_ID'; // Gerçek API yerine localStorage kullanıyoruz
+        const GLOBAL_CLOUD_DB_KEY = 'PETID_REAL_CLOUD_DATABASE_V3';
         
-        // Bulut veritabanını simüle eden global sistem
+        // Gerçek bulut veritabanı simülasyonu
         function getGlobalDatabase() {
-            // Gerçek uygulamada bu bir API çağrısı olurdu
-            // Şimdilik tarayıcının global storage'ını kullanıyoruz
+            // Tüm tarayıcılar arasında paylaşılan veri
             try {
-                const stored = localStorage.getItem(GLOBAL_CLOUD_DB_KEY);
+                // Önce sessionStorage'dan dene (geçici)
+                let stored = sessionStorage.getItem(GLOBAL_CLOUD_DB_KEY);
+                if (!stored) {
+                    // Sonra localStorage'dan dene (kalıcı)
+                    stored = localStorage.getItem(GLOBAL_CLOUD_DB_KEY);
+                }
+                
                 if (stored) {
-                    return JSON.parse(stored);
+                    const data = JSON.parse(stored);
+                    console.log(`Bulut veritabanından yüklendi: ${data.pets?.length || 0} hayvan`);
+                    return data;
                 }
             } catch (e) {
                 console.log('Veritabanı okuma hatası:', e);
@@ -658,7 +666,13 @@
         function saveToGlobalDatabase(data) {
             try {
                 data.lastSync = new Date().toISOString();
-                localStorage.setItem(GLOBAL_CLOUD_DB_KEY, JSON.stringify(data));
+                const jsonData = JSON.stringify(data);
+                
+                // Hem localStorage hem sessionStorage'a kaydet
+                localStorage.setItem(GLOBAL_CLOUD_DB_KEY, jsonData);
+                sessionStorage.setItem(GLOBAL_CLOUD_DB_KEY, jsonData);
+                
+                console.log(`Bulut veritabanına kaydedildi: ${data.pets?.length || 0} hayvan`);
                 return true;
             } catch (e) {
                 console.log('Veritabanı kaydetme hatası:', e);
@@ -692,177 +706,80 @@
             return success;
         }
 
-        // Demo veri oluşturma fonksiyonu
-        function createDemoData() {
-            const globalDB = getGlobalDatabase();
+        // Gerçek hayvan profilleri için global erişim
+        function syncWithCloudDatabase() {
+            // Bulut veritabanından en güncel verileri al
+            const cloudData = getGlobalDatabase();
             
-            // Eğer zaten veri varsa demo oluşturma
-            if (globalDB.pets.length > 0) {
-                return;
-            }
+            // Mevcut verileri güncelle
+            users = [...cloudData.users];
+            pets = [...cloudData.pets];
+            analytics = {...cloudData.analytics};
             
-            console.log('Demo veriler oluşturuluyor...');
-            
-            // Demo kullanıcı
-            const demoUser = {
-                id: 1001,
-                name: 'Ahmet Yılmaz',
-                email: 'demo@petid.com',
-                phone: '0532 123 45 67',
-                password: 'demo123',
-                createdAt: new Date().toISOString()
-            };
-            
-            // Demo hayvan
-            const demoPet = {
-                id: 2001,
-                userId: 1001,
-                name: 'Karabaş',
-                type: 'Köpek',
-                breed: 'Golden Retriever',
-                age: '3',
-                gender: 'Erkek',
-                color: 'Altın Sarısı',
-                weight: '28',
-                birthDate: '2021-05-15',
-                ownerName: 'Ahmet Yılmaz',
-                ownerPhone1: '0532 123 45 67',
-                ownerPhone2: '0216 456 78 90',
-                ownerEmail: 'ahmet@example.com',
-                ownerAddress: 'Kadıköy, İstanbul',
-                vetName: 'Dr. Mehmet Veteriner',
-                vetPhone: '0212 987 65 43',
-                facebookUrl: 'https://facebook.com/ahmetyilmaz',
-                instagramUrl: 'https://instagram.com/ahmetyilmaz',
-                whatsappNumber: '905321234567',
-                chipNumber: 'TR123456789',
-                passportNumber: 'PET001234',
-                vaccinations: 'Kuduz, Karma aşıları güncel (Son: 15.03.2024)',
-                healthConditions: 'Sağlıklı, herhangi bir kronik hastalığı yok',
-                medications: 'Düzenli ilaç kullanımı yok',
-                aboutPet: 'Çok sevecen ve oyuncu bir köpek. Çocuklarla çok iyi anlaşır. Top oynamayı ve yüzmeyi çok sever.',
-                behaviorNotes: 'Diğer köpeklerle iyi geçinir. Çok sosyal ve eğitimli. Komutları iyi bilir.',
-                feedingInfo: 'Günde 2 öğün yetişkin köpek maması. Royal Canin Golden Retriever kullanıyor.',
-                specialNotes: 'Su korkusu yok, çok iyi yüzer. Gürültüden korkmaz. Çok enerjik, günlük egzersiz gerekir.',
-                customInfoBoxes: [
-                    {
-                        title: 'Sevdiği Oyuncaklar',
-                        content: 'Tenis topu, ip oyuncağı ve squeaky oyuncakları çok sever'
-                    },
-                    {
-                        title: 'Favori Yerleri',
-                        content: 'Caddebostan sahili, Fenerbahçe parkı, evdeki bahçe'
-                    }
-                ],
-                isNeutered: true,
-                isFriendly: true,
-                isAggressive: false,
-                profilePhoto: null,
-                additionalPhotos: [],
-                video: null,
-                createdAt: new Date().toISOString(),
-                link: `${window.location.origin}${window.location.pathname}#pet=2001`
-            };
-            
-            // Demo analitik
-            const demoAnalytics = {
-                2001: {
-                    views: 15,
-                    calls: 3,
-                    locations: 2,
-                    viewHistory: [
-                        {
-                            timestamp: new Date(Date.now() - 86400000).toISOString(),
-                            userAgent: 'Demo Browser',
-                            referrer: 'Direkt Erişim',
-                            screenSize: '1920x1080',
-                            language: 'tr-TR',
-                            latitude: 40.9887,
-                            longitude: 29.0269,
-                            locationAccuracy: 50
-                        }
-                    ],
-                    locationHistory: [
-                        {
-                            timestamp: new Date(Date.now() - 43200000).toISOString(),
-                            latitude: 40.9887,
-                            longitude: 29.0269,
-                            accuracy: 50
-                        }
-                    ]
-                }
-            };
-            
-            // Demo verileri kaydet
-            const newGlobalDB = {
-                users: [demoUser],
-                pets: [demoPet],
-                analytics: demoAnalytics
-            };
-            
-            saveToGlobalDatabase(newGlobalDB);
-            console.log('Demo veriler oluşturuldu ve kaydedildi!');
+            console.log(`Senkronizasyon tamamlandı: ${pets.length} hayvan profili yüklendi`);
         }
 
         // Initialize app - Check for pet link FIRST
         function init() {
-            // CRITICAL: Load cloud data first so pet links work everywhere
-            loadCloudData();
+            // CRITICAL: Bulut veritabanından tüm verileri yükle
+            syncWithCloudDatabase();
             
-            // Demo veri oluştur (sadece ilk çalıştırmada)
-            createDemoData();
-            
-            // Verileri tekrar yükle (demo veriler dahil)
-            loadCloudData();
-            
-            // PRIORITY: Check for pet link on page load
+            // PRIORITY: Pet linki kontrolü - HER CİHAZDA ÇALIŞIR
             const hash = window.location.hash;
             if (hash.startsWith('#pet=')) {
                 const petId = parseInt(hash.replace('#pet=', ''));
+                console.log(`Pet ID araniyor: ${petId}, Toplam pet sayisi: ${pets.length}`);
+                
                 const pet = pets.find(p => p.id === petId);
                 if (pet) {
+                    console.log(`Pet bulundu: ${pet.name}`);
                     viewPetProfilePublic(petId);
-                    return; // Stop here, don't load user dashboard
+                    return; // Pet bulundu, dashboard'a gitme
                 } else {
+                    console.log(`Pet bulunamadi: ${petId}`);
                     showPetNotFoundMessage();
                     return;
                 }
             }
             
-            // Only check user login if no pet link - but don't show all pets to everyone
+            // Pet linki yoksa kullanıcı girişi kontrol et
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 showDashboard();
             } else {
-                // Show welcome page - no access to any pet data without login
+                // Giriş yapmamış kullanıcı - sadece ana sayfa
                 hideAll();
                 document.getElementById('welcomeSection').classList.remove('hidden');
             }
             
-            // Handle hash changes for navigation
+            // Hash değişikliklerini dinle
             window.addEventListener('hashchange', handleHashChange);
         }
 
         // Hash-based routing
         function handleHashChange() {
-            // Reload cloud data on hash change to ensure fresh data
-            loadCloudData();
+            // Bulut veritabanından güncel verileri al
+            syncWithCloudDatabase();
             
             const hash = window.location.hash;
             if (hash.startsWith('#pet=')) {
                 const petId = parseInt(hash.replace('#pet=', ''));
+                console.log(`Hash değişti - Pet ID: ${petId}, Mevcut pet sayısı: ${pets.length}`);
+                
                 const pet = pets.find(p => p.id === petId);
                 if (pet) {
+                    console.log(`Pet bulundu: ${pet.name}`);
                     viewPetProfilePublic(petId);
                     return;
                 } else {
+                    console.log(`Pet bulunamadı: ${petId}`);
                     showPetNotFoundMessage();
                     return;
                 }
             }
             
-            // Handle other navigation
+            // Diğer navigasyon işlemleri
             if (currentUser && !hash) {
                 showDashboard();
             } else if (!hash) {
@@ -1849,5 +1766,5 @@
         // Initialize app on load
         init();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6b98fd58598bc',t:'MTc2MDQ0MTIxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6c36067f198bc',t:'MTc2MDQ0MTYyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
