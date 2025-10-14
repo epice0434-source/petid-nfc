@@ -544,7 +544,37 @@
         let currentTab = 'media';
         let customInfoBoxCount = 0;
 
-        // Hash-based routing for GitHub Pages compatibility
+        // Initialize app - Check for pet link FIRST
+        function init() {
+            // PRIORITY: Check for pet link on page load
+            const hash = window.location.hash;
+            if (hash.startsWith('#pet=')) {
+                const petId = parseInt(hash.replace('#pet=', ''));
+                const pet = pets.find(p => p.id === petId);
+                if (pet) {
+                    viewPetProfilePublic(petId);
+                    return; // Stop here, don't load user dashboard
+                } else {
+                    showPetNotFoundMessage();
+                    return;
+                }
+            }
+            
+            // Only check user login if no pet link
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showDashboard();
+            } else {
+                hideAll();
+                document.getElementById('welcomeSection').classList.remove('hidden');
+            }
+            
+            // Handle hash changes for navigation
+            window.addEventListener('hashchange', handleHashChange);
+        }
+
+        // Hash-based routing
         function handleHashChange() {
             const hash = window.location.hash;
             if (hash.startsWith('#pet=')) {
@@ -553,13 +583,16 @@
                 if (pet) {
                     viewPetProfilePublic(petId);
                     return;
+                } else {
+                    showPetNotFoundMessage();
+                    return;
                 }
             }
             
-            // If no valid hash, show welcome or dashboard
-            if (currentUser) {
+            // Handle other navigation
+            if (currentUser && !hash) {
                 showDashboard();
-            } else {
+            } else if (!hash) {
                 hideAll();
                 document.getElementById('welcomeSection').classList.remove('hidden');
             }
@@ -569,7 +602,7 @@
         function viewPetProfilePublic(petId) {
             const pet = pets.find(p => p.id === petId);
             if (!pet) {
-                showMessage('Hayvan profili bulunamadı!', 'error');
+                showPetNotFoundMessage();
                 return;
             }
             
@@ -589,6 +622,19 @@
             const profileDiv = document.getElementById('petProfile');
             profileDiv.innerHTML = generatePetProfileHTML(pet, true); // true for public view
             profileDiv.classList.remove('hidden');
+        }
+
+        function showPetNotFoundMessage() {
+            hideAll();
+            const container = document.querySelector('.container');
+            container.innerHTML = `
+                <div class="text-center py-12 px-4">
+                    <div class="text-6xl mb-4">🐾</div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">Hayvan Profili Bulunamadı</h2>
+                    <p class="text-lg text-gray-600 mb-8">Bu link geçersiz veya hayvan profili silinmiş olabilir.</p>
+                    <button onclick="window.location.href = window.location.origin + window.location.pathname" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition">Ana Sayfaya Dön</button>
+                </div>
+            `;
         }
 
         // File upload functions
@@ -758,18 +804,6 @@
         
         function removeCustomInfoBox(boxId) {
             document.getElementById(boxId).remove();
-        }
-
-        // Initialize app
-        function init() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-            }
-            
-            // Handle hash-based routing
-            window.addEventListener('hashchange', handleHashChange);
-            handleHashChange();
         }
 
         // Navigation functions
@@ -1392,5 +1426,5 @@
         // Initialize app on load
         init();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6649aa65e98bc',t:'MTc2MDQzNzczOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e69595867b98bc',t:'MTc2MDQzOTc0NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
