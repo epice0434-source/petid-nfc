@@ -1188,35 +1188,38 @@
         // --- FIREBASE CORE FUNCTIONS ---
 
         // YENİ: Firestore'dan kullanıcının petlerini ve admin ayarlarını çeker
-        async function fetchUserDataAndShowDashboard(userId) {
-            try {
-                const userDoc = await db.collection('users').doc(userId).get();
-                
-                if (userDoc.exists) {
-                    // Firestore'da kullanıcı detayları varsa, Auth objesiyle birleştir
-                    currentUser = { ...auth.currentUser, ...userDoc.data() };
-                } else {
-                    // Firestore kaydı yoksa (eski kullanıcılar veya kayıt hatası), sadece Auth bilgisini kullan
-                    currentUser = auth.currentUser;
-                    currentUser.name = currentUser.email; 
-                    currentUser.phone = 'Bilinmiyor';
-                }
-
-                // Petler ve İstatistikler
-                const snapshot = await db.collection('pets').where('ownerId', '==', userId).get();
-                pets = [];
-                snapshot.forEach(doc => {
-                    pets.push({ id: doc.id, ...doc.data() });
-                });
-                
-                showUserDashboard();
-            } catch (error) {
-                console.error("Veri çekilirken hata:", error);
-                showNotification('Veri senkronizasyonu hatası: ' + error.message, 'error');
-                showUserDashboard();
-            }
-        }
+       // DÜZELTİLMİŞ: fetchUserDataAndShowDashboard
+async function fetchUserDataAndShowDashboard(userId) {
+    try {
+        const userDoc = await db.collection('users').doc(userId).get();
         
+        let userData = userDoc.exists ? userDoc.data() : {};
+        
+        // currentUser nesnesini oluştururken, Firestore'dan gelen (name, phone) ve
+        // Auth'tan gelen (uid, email) bilgileri birleştir.
+        currentUser = { 
+            ...auth.currentUser,
+            uid: userId, // Firebase Auth UID'si
+            name: userData.name || 'Bilinmiyor', // Firestore'dan gelmezse varsayılan
+            email: auth.currentUser.email,
+            phone: userData.phone || 'Girilmedi' // Firestore'dan gelmezse varsayılan
+        };
+
+        // Petler ve İstatistikler
+        const snapshot = await db.collection('pets').where('ownerId', '==', userId).get();
+        pets = [];
+        snapshot.forEach(doc => {
+            pets.push({ id: doc.id, ...doc.data() });
+        });
+        
+        showUserDashboard();
+        
+    } catch (error) {
+        console.error("Veri çekilirken hata:", error);
+        showNotification('Veri senkronizasyonu hatası: ' + error.message, 'error');
+        showUserDashboard();
+    }
+}
         // DÜZELTİLDİ: Kayıt İşlemi
         async function handleRegister(e) {
             e.preventDefault();
@@ -1579,3 +1582,4 @@
     </script>
 </body>
 </html>
+
