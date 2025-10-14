@@ -560,12 +560,13 @@
                 }
             }
             
-            // Only check user login if no pet link
+            // Only check user login if no pet link - but don't show all pets to everyone
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 showDashboard();
             } else {
+                // Show welcome page - no access to any pet data without login
                 hideAll();
                 document.getElementById('welcomeSection').classList.remove('hidden');
             }
@@ -1016,6 +1017,13 @@
 
         function displayPets() {
             const petList = document.getElementById('petList');
+            
+            // SECURITY: Only show pets belonging to the current logged-in user
+            if (!currentUser) {
+                petList.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">Giriş yapmanız gerekiyor.</div>';
+                return;
+            }
+            
             const userPets = pets.filter(pet => pet.userId === currentUser.id);
             
             if (userPets.length === 0) {
@@ -1063,6 +1071,12 @@
         function viewPetProfile(petId) {
             const pet = pets.find(p => p.id === petId);
             if (!pet) return;
+            
+            // SECURITY: Only pet owner can view from dashboard
+            if (!currentUser || pet.userId !== currentUser.id) {
+                showMessage('Bu hayvana erişim yetkiniz yok!', 'error');
+                return;
+            }
             
             // Simulate view tracking
             if (!analytics[petId]) {
@@ -1278,8 +1292,15 @@
 
         function viewAnalytics(petId) {
             const pet = pets.find(p => p.id === petId);
-            const petAnalytics = analytics[petId] || { views: 0, calls: 0, locations: 0, viewHistory: [] };
+            if (!pet) return;
             
+            // SECURITY: Only pet owner can view analytics
+            if (!currentUser || pet.userId !== currentUser.id) {
+                showMessage('Bu hayvana erişim yetkiniz yok!', 'error');
+                return;
+            }
+            
+            const petAnalytics = analytics[petId] || { views: 0, calls: 0, locations: 0, viewHistory: [] };
             showAnalyticsModal(pet, petAnalytics);
         }
 
@@ -1307,6 +1328,15 @@
         }
 
         function updateStats() {
+            // SECURITY: Only calculate stats for current user's pets
+            if (!currentUser) {
+                document.getElementById('totalPets').textContent = '0';
+                document.getElementById('totalViews').textContent = '0';
+                document.getElementById('totalCalls').textContent = '0';
+                document.getElementById('totalLocations').textContent = '0';
+                return;
+            }
+            
             const userPets = pets.filter(pet => pet.userId === currentUser.id);
             const totalViews = userPets.reduce((sum, pet) => sum + (analytics[pet.id]?.views || 0), 0);
             const totalCalls = userPets.reduce((sum, pet) => sum + (analytics[pet.id]?.calls || 0), 0);
@@ -1426,5 +1456,5 @@
         // Initialize app on load
         init();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e69595867b98bc',t:'MTc2MDQzOTc0NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e69e50219b98bc',t:'MTc2MDQ0MDEwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
