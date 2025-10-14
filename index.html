@@ -614,16 +614,26 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            // Load data from localStorage first
+            loadDataFromStorage();
+            
             // Check if viewing a pet profile from URL
             const urlParams = new URLSearchParams(window.location.search);
             const petId = urlParams.get('pet');
             
             if (petId) {
                 showPetProfile(petId);
+            } else if (currentUser) {
+                // If user is logged in, show dashboard
+                showUserDashboard();
             }
             
             initializeEventListeners();
-            loadSampleData();
+            
+            // Load sample data only if no data exists
+            if (pets.length === 0) {
+                loadSampleData();
+            }
         });
 
         function initializeEventListeners() {
@@ -673,6 +683,9 @@
                 phone: '+90 555 123 4567'
             };
             
+            // Save to localStorage
+            saveDataToStorage();
+            
             hideModal('loginModal');
             showUserDashboard();
         }
@@ -686,6 +699,9 @@
                 email: e.target.elements[1].value,
                 phone: e.target.elements[2].value
             };
+            
+            // Save to localStorage
+            saveDataToStorage();
             
             hideModal('registerModal');
             showUserDashboard();
@@ -706,6 +722,10 @@
 
         function logout() {
             currentUser = null;
+            
+            // Save to localStorage
+            saveDataToStorage();
+            
             document.getElementById('welcomeSection').classList.remove('hidden');
             document.getElementById('userDashboard').classList.add('hidden');
             document.getElementById('petProfileView').classList.add('hidden');
@@ -771,6 +791,9 @@
             
             pets.push(newPet);
             petStats[newPet.id] = { views: 0, calls: 0, locations: [] };
+            
+            // Save to localStorage
+            saveDataToStorage();
             
             hideModal('addPetModal');
             renderPetsList();
@@ -908,6 +931,7 @@
             if (!isOwner) {
                 if (!petStats[pet.id]) petStats[pet.id] = { views: 0, calls: 0, locations: [] };
                 petStats[pet.id].views++;
+                saveDataToStorage();
             }
             
             document.getElementById('welcomeSection').classList.add('hidden');
@@ -1177,6 +1201,7 @@
                         timestamp: new Date()
                     });
                     
+                    saveDataToStorage();
                     showNotification('Konumunuz sahibine gönderildi! Teşekkür ederiz.', 'success');
                 }, () => {
                     showNotification('Konum erişimi reddedildi.', 'error');
@@ -1200,7 +1225,10 @@
                             lng: position.coords.longitude,
                             timestamp: new Date()
                         });
+                        saveDataToStorage();
                     });
+                } else {
+                    saveDataToStorage();
                 }
                 
                 // Open phone dialer
@@ -1445,6 +1473,45 @@
             };
         }
 
+        // Data persistence functions
+        function saveDataToStorage() {
+            try {
+                const data = {
+                    currentUser: currentUser,
+                    pets: pets,
+                    petStats: petStats
+                };
+                localStorage.setItem('patilink_data', JSON.stringify(data));
+            } catch (error) {
+                console.error('Veri kaydedilemedi:', error);
+            }
+        }
+
+        function loadDataFromStorage() {
+            try {
+                const savedData = localStorage.getItem('patilink_data');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    currentUser = data.currentUser || null;
+                    pets = data.pets || [];
+                    petStats = data.petStats || {};
+                    
+                    // Update navigation if user is logged in
+                    if (currentUser) {
+                        document.getElementById('loginBtn').textContent = 'Çıkış Yap';
+                        document.getElementById('loginBtn').onclick = logout;
+                        document.getElementById('registerBtn').style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Veri yüklenemedi:', error);
+                // Reset to defaults if data is corrupted
+                currentUser = null;
+                pets = [];
+                petStats = {};
+            }
+        }
+
         function getSamplePet(petId) {
             // Return sample pet for demo purposes
             if (petId === 'demo') {
@@ -1510,5 +1577,5 @@
             };
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e7d25d84fa98bc',t:'MTc2MDQ1MjcyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e7da5af22c98bc',t:'MTc2MDQ1MzA0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
