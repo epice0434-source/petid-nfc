@@ -544,6 +544,53 @@
         let currentTab = 'media';
         let customInfoBoxCount = 0;
 
+        // Hash-based routing for GitHub Pages compatibility
+        function handleHashChange() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#pet=')) {
+                const petId = parseInt(hash.replace('#pet=', ''));
+                const pet = pets.find(p => p.id === petId);
+                if (pet) {
+                    viewPetProfilePublic(petId);
+                    return;
+                }
+            }
+            
+            // If no valid hash, show welcome or dashboard
+            if (currentUser) {
+                showDashboard();
+            } else {
+                hideAll();
+                document.getElementById('welcomeSection').classList.remove('hidden');
+            }
+        }
+
+        // Public pet profile view (for shared links)
+        function viewPetProfilePublic(petId) {
+            const pet = pets.find(p => p.id === petId);
+            if (!pet) {
+                showMessage('Hayvan profili bulunamadı!', 'error');
+                return;
+            }
+            
+            // Track view
+            if (!analytics[petId]) {
+                analytics[petId] = { views: 0, calls: 0, locations: 0, viewHistory: [] };
+            }
+            analytics[petId].views++;
+            analytics[petId].viewHistory.push({
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                location: 'Demo Location'
+            });
+            localStorage.setItem('analytics', JSON.stringify(analytics));
+            
+            hideAll();
+            const profileDiv = document.getElementById('petProfile');
+            profileDiv.innerHTML = generatePetProfileHTML(pet, true); // true for public view
+            profileDiv.classList.remove('hidden');
+        }
+
         // File upload functions
         function handleFileUpload(input, previewId) {
             const file = input.files[0];
@@ -718,19 +765,24 @@
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
-                showDashboard();
             }
+            
+            // Handle hash-based routing
+            window.addEventListener('hashchange', handleHashChange);
+            handleHashChange();
         }
 
         // Navigation functions
         function showLogin() {
             hideAll();
             document.getElementById('loginForm').classList.remove('hidden');
+            window.location.hash = '';
         }
 
         function showRegister() {
             hideAll();
             document.getElementById('registerForm').classList.remove('hidden');
+            window.location.hash = '';
         }
 
         function showDashboard() {
@@ -738,6 +790,7 @@
             document.getElementById('dashboard').classList.remove('hidden');
             updateStats();
             displayPets();
+            window.location.hash = '';
         }
 
         function showAddPet() {
@@ -749,6 +802,7 @@
                 document.getElementById('ownerEmail').value = currentUser.email;
                 document.getElementById('ownerPhone1').value = currentUser.phone;
             }
+            window.location.hash = '';
         }
 
         function hideForms() {
@@ -817,6 +871,7 @@
             localStorage.removeItem('currentUser');
             hideAll();
             document.getElementById('welcomeSection').classList.remove('hidden');
+            window.location.hash = '';
         }
 
         // Pet management
@@ -837,8 +892,9 @@
                 }
             }
             
+            const petId = Date.now();
             const petData = {
-                id: Date.now(),
+                id: petId,
                 userId: currentUser.id,
                 name: document.getElementById('petName').value,
                 type: document.getElementById('petType').value,
@@ -875,7 +931,7 @@
                 additionalPhotos: uploadedFiles.additionalPhotos || [],
                 video: uploadedFiles.petVideo || null,
                 createdAt: new Date().toISOString(),
-                link: `${window.location.origin}/pet/${Date.now()}`
+                link: `${window.location.origin}${window.location.pathname}#pet=${petId}`
             };
 
             pets.push(petData);
@@ -982,17 +1038,17 @@
             analytics[petId].viewHistory.push({
                 timestamp: new Date().toISOString(),
                 userAgent: navigator.userAgent,
-                location: 'Demo Location' // In real app, would get actual location
+                location: 'Demo Location'
             });
             localStorage.setItem('analytics', JSON.stringify(analytics));
             
             hideAll();
             const profileDiv = document.getElementById('petProfile');
-            profileDiv.innerHTML = generatePetProfileHTML(pet);
+            profileDiv.innerHTML = generatePetProfileHTML(pet, false); // false for owner view
             profileDiv.classList.remove('hidden');
         }
 
-        function generatePetProfileHTML(pet) {
+        function generatePetProfileHTML(pet, isPublicView = false) {
             return `
                 <div class="bg-white rounded-xl card-shadow overflow-hidden">
                     <!-- Header -->
@@ -1003,7 +1059,10 @@
                         }
                         <h1 class="text-4xl font-bold mb-2">${pet.name}</h1>
                         <p class="text-xl opacity-90">${pet.type} • ${pet.breed || 'Melez'}</p>
-                        <button onclick="showDashboard()" class="mt-4 bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition">← Geri Dön</button>
+                        ${isPublicView ? 
+                            `<div class="mt-4 text-sm opacity-75">Bu hayvan kayıp mı? Lütfen aşağıdaki iletişim bilgilerini kullanın.</div>` :
+                            `<button onclick="showDashboard()" class="mt-4 bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition">← Geri Dön</button>`
+                        }
                     </div>
                     
                     <!-- Content -->
@@ -1155,7 +1214,7 @@
                         
                         <div class="mt-8 text-center text-gray-500 text-sm">
                             <p>Bu profil ${new Date(pet.createdAt).toLocaleDateString('tr-TR')} tarihinde oluşturulmuştur.</p>
-                            <p class="mt-2">Kayıp hayvanı bulduysanız lütfen yukarıdaki iletişim bilgilerini kullanarak sahipleriyle iletişime geçin.</p>
+                            ${isPublicView ? '<p class="mt-2">Kayıp hayvanı bulduysanız lütfen yukarıdaki iletişim bilgilerini kullanarak sahipleriyle iletişime geçin.</p>' : ''}
                         </div>
                     </div>
                 </div>
@@ -1333,5 +1392,5 @@
         // Initialize app on load
         init();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e63e9d868898bc',t:'MTc2MDQzNjE4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6649aa65e98bc',t:'MTc2MDQzNzczOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
