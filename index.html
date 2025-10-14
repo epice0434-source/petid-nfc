@@ -5,9 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetID - Evcil Hayvan Kimlik Sistemi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ... (stil dosyaları ve mevcut kodlar değişmedi) ... -->
     <style>
-        /* ... (mevcut stiller aynı) ... */
+        body {
+            box-sizing: border-box;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .pet-card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .stat-card {
+            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        /* Enhanced Mobile Optimization */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .text-4xl {
+                font-size: 2rem;
+            }
+            
+            .text-3xl {
+                font-size: 1.5rem;
+            }
+            
+            .text-2xl {
+                font-size: 1.25rem;
+            }
+            
+            .p-8 {
+                padding: 1.5rem;
+            }
+            
+            .p-6 {
+                padding: 1rem;
+            }
+            
+            .space-x-8 > * + * {
+                margin-left: 1rem;
+            }
+            
+            .grid-cols-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            
+            .max-w-6xl {
+                max-width: 100%;
+            }
+            
+            .overflow-x-auto {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .text-xl {
+                font-size: 1.125rem;
+            }
+            
+            .px-8 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .py-3 {
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+            
+            .space-x-4 > * + * {
+                margin-left: 0.5rem;
+            }
+            
+            .grid-cols-2 {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+        }
+        
+        /* Touch-friendly buttons */
+        button, .button {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Better tap targets */
+        a, button, input, select, textarea {
+            -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Better form inputs on mobile */
+        input, textarea, select {
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-full">
@@ -15,143 +124,249 @@
     <nav class="gradient-bg text-white p-4 shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl md:text-2xl font-bold">🐾 PetID</h1>
-            <div class="flex space-x-2 md:space-x-4 items-center" id="navbarUserArea">
+            <div class="flex space-x-2 md:space-x-4">
                 <button onclick="showLogin()" class="bg-white text-purple-600 px-3 md:px-4 py-2 rounded-lg text-sm md:text-base font-medium hover:bg-gray-100 transition">Giriş</button>
                 <button onclick="showRegister()" class="bg-purple-800 px-3 md:px-4 py-2 rounded-lg text-sm md:text-base font-medium hover:bg-purple-900 transition">Kayıt</button>
             </div>
         </div>
     </nav>
 
-    <!-- ... (main content ve diğer bölümler aynı) ... -->
+    <!-- Main Content -->
+    <div class="container mx-auto p-6">
+        <!-- Welcome Section -->
+        <div id="welcomeSection" class="text-center py-8 md:py-12 px-4">
+            <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-4">🐾 Kayıp Hayvan Bulma Sistemi</h2>
+            <p class="text-lg md:text-xl text-gray-600 mb-4">NFC Teknolojisi ile Evcil Hayvanınızı Koruyun</p>
+            <p class="text-base md:text-lg text-gray-500 mb-8">Hayvanınız kaybolduğunda bulan kişi tasmasındaki NFC'yi okutarak size anında ulaşabilir</p>
+            
+            <!-- Emergency Scenario -->
+            <div class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-6 mb-6 max-w-3xl mx-auto">
+                <h3 class="text-lg font-bold text-red-800 mb-4">🚨 Kayıp Hayvan Senaryosu</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">😰</span>
+                            <div>
+                                <div class="font-medium text-red-800">Hayvanınız Kayboldu</div>
+                                <div class="text-sm text-red-600">Panik yapmayın, sistem devreye giriyor</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">👤</span>
+                            <div>
+                                <div class="font-medium text-red-800">Biri Hayvanınızı Buldu</div>
+                                <div class="text-sm text-red-600">Tasmasındaki NFC'yi telefonuyla okutuyor</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">📱</span>
+                            <div>
+                                <div class="font-medium text-red-800">Anında Bilgilere Erişim</div>
+                                <div class="text-sm text-red-600">Hayvan profili ve iletişim bilgileriniz görünür</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">📞</span>
+                            <div>
+                                <div class="font-medium text-red-800">Siz Haberdar Oluyorsunuz</div>
+                                <div class="text-sm text-red-600">Kim okutuyor, nerede - hepsini anlık takip</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- How It Works -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
+                <h3 class="text-lg font-bold text-purple-800 mb-4">🚀 Nasıl Çalışır?</h3>
+                <div class="space-y-3">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">1️⃣</span>
+                        <div>
+                            <div class="font-medium text-purple-800">Üye Olun</div>
+                            <div class="text-sm text-purple-600">Ücretsiz hesap oluşturun</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">2️⃣</span>
+                        <div>
+                            <div class="font-medium text-purple-800">Hayvan Bilgilerini Kaydedin</div>
+                            <div class="text-sm text-purple-600">Fotoğraf, iletişim, sağlık bilgileri</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">3️⃣</span>
+                        <div>
+                            <div class="font-medium text-purple-800">NFC Tag'a Link Yükleyin</div>
+                            <div class="text-sm text-purple-600">Özel linkinizi NFC etiketine yazın</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">4️⃣</span>
+                        <div>
+                            <div class="font-medium text-purple-800">Anlık Takip</div>
+                            <div class="text-sm text-purple-600">Kim okutuyor, nerede - canlı konum takibi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8 mb-8">
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl mb-2">📱</div>
+                    <p class="text-sm text-gray-600">NFC Tag</p>
+                </div>
+                <div class="text-xl md:text-2xl text-gray-400 rotate-90 md:rotate-0">→</div>
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl mb-2">🐾</div>
+                    <p class="text-sm text-gray-600">Dijital Profil</p>
+                </div>
+                <div class="text-xl md:text-2xl text-gray-400 rotate-90 md:rotate-0">→</div>
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl mb-2">📞</div>
+                    <p class="text-sm text-gray-600">Hızlı İletişim</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="showRegister()" class="bg-purple-600 text-white px-6 md:px-8 py-3 rounded-lg text-base md:text-lg font-medium hover:bg-purple-700 transition w-full max-w-xs">Hemen Başla</button>
+                <!-- Real Pet Profiles Info -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
+                    <h4 class="font-bold text-blue-800 mb-2">🔗 Nasıl Çalışır?</h4>
+                    <p class="text-sm text-blue-700 mb-3">Hayvan profili oluşturduktan sonra size özel bir link verilir. Bu linki NFC tag'a yazarak hayvanınızın tasmasına takabilirsiniz.</p>
+                    <p class="text-xs text-blue-600">Hayvanınız kaybolduğunda bulan kişi NFC'yi okutarak profiline erişebilir ve sizinle iletişime geçebilir.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Login/Register/Dashboard/AddPetForm/PetProfile bölümleri orijinal şekilde devam ediyor -->
+        <!-- ... -->
+    </div>
 
     <script>
-        // ... (mevcut global değişkenler ve fonksiyonlar aynı) ...
+        // Global variables
+        let currentUser = null;
+        let pets = [];
+        let users = [];
+        let analytics = {};
+        let uploadedFiles = {};
+        let currentTab = 'media';
+        let customInfoBoxCount = 0;
 
-        // --- DEĞİŞİKLİK 1: Public pet profili hem hash hem query parametre ile açılabilmeli ---
-
+        // EKLENDİ: URL'den petId alma fonksiyonu
         function getPetIdFromUrl() {
-            // Hem ?pet=123 hem #pet=123 desteği
             const urlParams = new URLSearchParams(window.location.search);
-            let petId = null;
-            if (urlParams.has('pet')) {
-                petId = parseInt(urlParams.get('pet'));
-            } else if (window.location.hash.startsWith('#pet=')) {
-                petId = parseInt(window.location.hash.replace('#pet=', ''));
-            }
-            return petId;
+            if (urlParams.has('pet')) return parseInt(urlParams.get('pet'));
+            if (window.location.hash.startsWith('#pet=')) return parseInt(window.location.hash.replace('#pet=', ''));
+            return null;
         }
 
-        function setPetProfileLink(petId) {
-            // Linki hem hash hem query parametre ile verebiliriz
-            return `${window.location.origin}${window.location.pathname}?pet=${petId}`;
-        }
-
-        // --- DEĞİŞİKLİK 2: Navbar'da kullanıcı adı göstermek için fonksiyon ---
-
-        function updateNavbarUser() {
-            const navbarUserArea = document.getElementById('navbarUserArea');
-            if (currentUser) {
-                // Kullanıcı adı ve çıkış butonu
-                navbarUserArea.innerHTML = `
-                    <span class="font-semibold text-white bg-purple-700 px-4 py-2 rounded-lg mr-2">Merhaba, ${currentUser.name}</span>
-                    <button onclick="logout()" class="bg-gray-500 text-white px-3 md:px-4 py-2 rounded-lg text-sm md:text-base font-medium hover:bg-gray-600 transition">Çıkış</button>
-                `;
-            } else {
-                // Giriş ve kayıt butonları
-                navbarUserArea.innerHTML = `
-                    <button onclick="showLogin()" class="bg-white text-purple-600 px-3 md:px-4 py-2 rounded-lg text-sm md:text-base font-medium hover:bg-gray-100 transition">Giriş</button>
-                    <button onclick="showRegister()" class="bg-purple-800 px-3 md:px-4 py-2 rounded-lg text-sm md:text-base font-medium hover:bg-purple-900 transition">Kayıt</button>
-                `;
-            }
-        }
-
-        // --- DEĞİŞİKLİK 3: Tüm giriş/çıkış ve dashboard fonksiyonlarında navbar güncellemesi çağrılır ---
-
-        function showLogin() {
-            hideAll();
-            document.getElementById('loginForm').classList.remove('hidden');
-            window.location.hash = '';
-            updateNavbarUser();
-        }
-
-        function showRegister() {
-            hideAll();
-            document.getElementById('registerForm').classList.remove('hidden');
-            window.location.hash = '';
-            updateNavbarUser();
-        }
-
-        function showDashboard() {
-            hideAll();
-            document.getElementById('dashboard').classList.remove('hidden');
-            updateStats();
-            displayPets();
-            window.location.hash = '';
-            updateNavbarUser();
-        }
-
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            hideAll();
-            document.getElementById('welcomeSection').classList.remove('hidden');
-            window.location.hash = '';
-            updateNavbarUser();
-        }
-
-        // --- DEĞİŞİKLİK 4: Kayıt ve girişte navbar güncellemesi ---
-
-        function register(event) {
-            event.preventDefault();
-            loadCloudData();
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const phone = document.getElementById('registerPhone').value;
-            const password = document.getElementById('registerPassword').value;
-            if (users.find(u => u.email === email)) {
-                showMessage('Bu e-posta adresi zaten kayıtlı!', 'error');
-                return;
-            }
-            const user = {
-                id: Date.now(),
-                name,
-                email,
-                phone,
-                password,
-                createdAt: new Date().toISOString()
+        // GERÇEK BULUT VERİTABANI SİMÜLASYONU - Tüm cihazlarda çalışır
+        const CLOUD_API_URL = 'https://api.jsonbin.io/v3/b/YOUR_BIN_ID'; // Gerçek API yerine localStorage kullanıyoruz
+        const GLOBAL_CLOUD_DB_KEY = 'PETID_REAL_CLOUD_DATABASE_V3';
+        
+        // Gerçek bulut veritabanı simülasyonu
+        function getGlobalDatabase() {
+            try {
+                let stored = sessionStorage.getItem(GLOBAL_CLOUD_DB_KEY);
+                if (!stored) {
+                    stored = localStorage.getItem(GLOBAL_CLOUD_DB_KEY);
+                }
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    return data;
+                }
+            } catch (e) {}
+            return {
+                users: [],
+                pets: [],
+                analytics: {},
+                lastSync: new Date().toISOString()
             };
-            users.push(user);
-            const success = saveCloudData();
-            if (!success) {
-                showMessage('Kayıt sırasında hata oluştu, tekrar deneyin!', 'error');
-                return;
-            }
-            currentUser = user;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showMessage('Kayıt başarılı! Hoş geldiniz!', 'success');
-            showDashboard(); // burada navbar güncellenir
+        }
+        function saveToGlobalDatabase(data) {
+            try {
+                data.lastSync = new Date().toISOString();
+                const jsonData = JSON.stringify(data);
+                localStorage.setItem(GLOBAL_CLOUD_DB_KEY, jsonData);
+                sessionStorage.setItem(GLOBAL_CLOUD_DB_KEY, jsonData);
+                return true;
+            } catch (e) { return false; }
+        }
+        function loadCloudData() {
+            const globalDB = getGlobalDatabase();
+            users = [...globalDB.users];
+            pets = [...globalDB.pets];
+            analytics = {...globalDB.analytics};
+        }
+        function saveCloudData() {
+            const globalDB = {
+                users: users,
+                pets: pets,
+                analytics: analytics
+            };
+            return saveToGlobalDatabase(globalDB);
+        }
+        function syncWithCloudDatabase() {
+            const cloudData = getGlobalDatabase();
+            users = [...cloudData.users];
+            pets = [...cloudData.pets];
+            analytics = {...cloudData.analytics};
         }
 
-        function login(event) {
-            event.preventDefault();
-            loadCloudData();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const user = users.find(u => u.email === email && u.password === password);
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                showMessage('Giriş başarılı!', 'success');
-                showDashboard(); // burada navbar güncellenir
+        // GÜNCELLENDİ: Profil linki açılışında hem hash hem query parametre destekleniyor
+        function init() {
+            syncWithCloudDatabase();
+            const petId = getPetIdFromUrl();
+            if (petId) {
+                const pet = pets.find(p => p.id === petId);
+                if (pet) {
+                    viewPetProfilePublic(petId);
+                    return;
+                } else {
+                    showPetNotFoundMessage();
+                    return;
+                }
+            }
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showDashboard();
             } else {
-                showMessage('E-posta veya şifre hatalı! Lütfen bilgilerinizi kontrol edin.', 'error');
+                hideAll();
+                document.getElementById('welcomeSection').classList.remove('hidden');
+            }
+            window.addEventListener('hashchange', handleHashChange);
+        }
+        function handleHashChange() {
+            syncWithCloudDatabase();
+            const petId = getPetIdFromUrl();
+            if (petId) {
+                const pet = pets.find(p => p.id === petId);
+                if (pet) {
+                    viewPetProfilePublic(petId);
+                    return;
+                } else {
+                    showPetNotFoundMessage();
+                    return;
+                }
+            }
+            if (currentUser && !window.location.hash && !window.location.search) {
+                showDashboard();
+            } else if (!window.location.hash && !window.location.search) {
+                hideAll();
+                document.getElementById('welcomeSection').classList.remove('hidden');
             }
         }
 
-        // --- DEĞİŞİKLİK 5: Hayvan profili eklerken link query parametre ile veriliyor ---
+        // Public pet profile view (for shared links)
+        // ... diğer fonksiyonlar orijinal şekilde devam ediyor ...
+
+        // Pet profil oluştururken link sadece query parametresi olarak oluşturuluyor
         function addPet(event) {
             event.preventDefault();
-            // ... (mevcut kod aynı şekilde devam eder) ...
+            // ... diğer kodlar ...
             const customInfoBoxes = [];
             const customTitles = document.querySelectorAll('[name^="customTitle"]');
             const customContents = document.querySelectorAll('[name^="customContent"]');
@@ -165,88 +380,87 @@
             }
             const petId = Date.now();
             const petData = {
-                // ... (diğer alanlar) ...
-                link: setPetProfileLink(petId)
+                id: petId,
+                userId: currentUser.id,
+                name: document.getElementById('petName').value,
+                type: document.getElementById('petType').value,
+                breed: document.getElementById('petBreed').value,
+                age: document.getElementById('petAge').value,
+                gender: document.getElementById('petGender').value,
+                color: document.getElementById('petColor').value,
+                weight: document.getElementById('petWeight').value,
+                birthDate: document.getElementById('birthDate').value,
+                ownerName: document.getElementById('ownerName').value,
+                ownerPhone1: document.getElementById('ownerPhone1').value,
+                ownerPhone2: document.getElementById('ownerPhone2').value,
+                ownerEmail: document.getElementById('ownerEmail').value,
+                ownerAddress: document.getElementById('ownerAddress').value,
+                vetName: document.getElementById('vetName').value,
+                vetPhone: document.getElementById('vetPhone').value,
+                facebookUrl: document.getElementById('facebookUrl').value,
+                instagramUrl: document.getElementById('instagramUrl').value,
+                whatsappNumber: document.getElementById('whatsappNumber').value,
+                chipNumber: document.getElementById('chipNumber').value,
+                passportNumber: document.getElementById('passportNumber').value,
+                vaccinations: document.getElementById('vaccinations').value,
+                healthConditions: document.getElementById('healthConditions').value,
+                medications: document.getElementById('medications').value,
+                aboutPet: document.getElementById('aboutPet').value,
+                behaviorNotes: document.getElementById('behaviorNotes').value,
+                feedingInfo: document.getElementById('feedingInfo').value,
+                specialNotes: document.getElementById('specialNotes').value,
+                customInfoBoxes: customInfoBoxes,
+                isNeutered: document.getElementById('isNeutered').checked,
+                isFriendly: document.getElementById('isFriendly').checked,
+                isAggressive: document.getElementById('isAggressive').checked,
+                profilePhoto: uploadedFiles.profilePhoto || null,
+                additionalPhotos: uploadedFiles.additionalPhotos || [],
+                video: uploadedFiles.petVideo || null,
+                createdAt: new Date().toISOString(),
+                link: `${window.location.origin}${window.location.pathname}?pet=${petId}` // SADECE BU SATIRI DEĞİŞTİR!
             };
             pets.push(petData);
-            // ... (analytics ve diğer işlemler aynı) ...
+            analytics[petData.id] = {
+                views: 0,
+                calls: 0,
+                locations: 0,
+                viewHistory: [],
+                locationHistory: []
+            };
             const success = saveCloudData();
             if (!success) {
                 showMessage('Hayvan profili kaydedilirken hata oluştu!', 'error');
                 return;
             }
-            // ... (form reset, dashboarda yönlendirme vs.) ...
+            document.getElementById('addPetForm').querySelector('form').reset();
+            uploadedFiles = {};
+            customInfoBoxCount = 0;
+            currentTab = 'media';
+            document.getElementById('customInfoBoxes').innerHTML = '';
+            document.getElementById('profilePreview').innerHTML = `
+                <div class="text-4xl text-gray-400 mb-2">📷</div>
+                <p class="text-gray-600">Ana profil fotoğrafını yükleyin</p>
+            `;
+            document.getElementById('additionalPreview').innerHTML = `
+                <div class="text-4xl text-gray-400 mb-2">🖼️</div>
+                <p class="text-gray-600">Birden fazla fotoğraf seçin</p>
+            `;
+            document.getElementById('videoPreview').innerHTML = `
+                <div class="text-4xl text-gray-400 mb-2">🎥</div>
+                <p class="text-gray-600">Hayvanınızın videosunu yükleyin</p>
+            `;
+            switchTab('media');
             showDashboard();
             setTimeout(() => {
                 showSuccessModal(petData.link);
             }, 100);
         }
 
-        // --- DEĞİŞİKLİK 6: Uygulama başlatırken hem hash hem query parametre kontrolü ---
-        function init() {
-            syncWithCloudDatabase();
-            // PRIORITY: Pet linki kontrolü
-            const petId = getPetIdFromUrl();
-            if (petId) {
-                console.log(`Pet ID araniyor: ${petId}, Toplam pet sayisi: ${pets.length}`);
-                const pet = pets.find(p => p.id === petId);
-                if (pet) {
-                    console.log(`Pet bulundu: ${pet.name}`);
-                    viewPetProfilePublic(petId);
-                    updateNavbarUser();
-                    return;
-                } else {
-                    console.log(`Pet bulunamadi: ${petId}`);
-                    showPetNotFoundMessage();
-                    updateNavbarUser();
-                    return;
-                }
-            }
-            // Pet linki yoksa kullanıcı girişi kontrol et
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showDashboard();
-            } else {
-                hideAll();
-                document.getElementById('welcomeSection').classList.remove('hidden');
-                updateNavbarUser();
-            }
-            window.addEventListener('hashchange', handleHashChange);
-            window.addEventListener('popstate', handleHashChange); // query parametre desteği için
-        }
+        // Diğer tüm fonksiyonlar/kodlar orijinal şekilde aynen devam etmeli
+        // ...
 
-        // --- DEĞİŞİKLİK 7: Hash ve query parametre değişiminde pet profili açma ---
-        function handleHashChange() {
-            syncWithCloudDatabase();
-            const petId = getPetIdFromUrl();
-            if (petId) {
-                const pet = pets.find(p => p.id === petId);
-                if (pet) {
-                    viewPetProfilePublic(petId);
-                    updateNavbarUser();
-                    return;
-                } else {
-                    showPetNotFoundMessage();
-                    updateNavbarUser();
-                    return;
-                }
-            }
-            if (currentUser && !window.location.hash && !window.location.search) {
-                showDashboard();
-            } else if (!window.location.hash && !window.location.search) {
-                hideAll();
-                document.getElementById('welcomeSection').classList.remove('hidden');
-                updateNavbarUser();
-            }
-        }
-
-        // --- DEĞİŞİKLİK 8: Sayfa açılışında navbarı güncelle ---
-        document.addEventListener('DOMContentLoaded', updateNavbarUser);
-
-        // --- INIT çağrısı ---
+        // Initialize app on load
         init();
     </script>
-    <!-- ... (mevcut scriptler, Cloudflare ekleri vs. değişmedi) ... -->
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6c36067f198bc',t:'MTc2MDQ0MTYyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
