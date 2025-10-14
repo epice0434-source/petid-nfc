@@ -135,9 +135,48 @@
     <div class="container mx-auto p-6">
         <!-- Welcome Section -->
         <div id="welcomeSection" class="text-center py-8 md:py-12 px-4">
-            <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-4">NFC Etiketler İçin Dijital Hayvan Profili</h2>
-            <p class="text-lg md:text-xl text-gray-600 mb-4">Evcil hayvanınız için kapsamlı dijital kimlik oluşturun</p>
-            <p class="text-base md:text-lg text-gray-500 mb-8">NFC tag'ınıza yazabileceğiniz özel link ile hayvanınızın tüm bilgilerine erişim sağlayın</p>
+            <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-4">🐾 Kayıp Hayvan Bulma Sistemi</h2>
+            <p class="text-lg md:text-xl text-gray-600 mb-4">NFC Teknolojisi ile Evcil Hayvanınızı Koruyun</p>
+            <p class="text-base md:text-lg text-gray-500 mb-8">Hayvanınız kaybolduğunda bulan kişi tasmasındaki NFC'yi okutarak size anında ulaşabilir</p>
+            
+            <!-- Emergency Scenario -->
+            <div class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-6 mb-6 max-w-3xl mx-auto">
+                <h3 class="text-lg font-bold text-red-800 mb-4">🚨 Kayıp Hayvan Senaryosu</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">😰</span>
+                            <div>
+                                <div class="font-medium text-red-800">Hayvanınız Kayboldu</div>
+                                <div class="text-sm text-red-600">Panik yapmayın, sistem devreye giriyor</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">👤</span>
+                            <div>
+                                <div class="font-medium text-red-800">Biri Hayvanınızı Buldu</div>
+                                <div class="text-sm text-red-600">Tasmasındaki NFC'yi telefonuyla okutuyor</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">📱</span>
+                            <div>
+                                <div class="font-medium text-red-800">Anında Bilgilere Erişim</div>
+                                <div class="text-sm text-red-600">Hayvan profili ve iletişim bilgileriniz görünür</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">📞</span>
+                            <div>
+                                <div class="font-medium text-red-800">Siz Haberdar Oluyorsunuz</div>
+                                <div class="text-sm text-red-600">Kim okutuyor, nerede - hepsini anlık takip</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- How It Works -->
             <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
@@ -146,29 +185,29 @@
                     <div class="flex items-start">
                         <span class="text-2xl mr-3">1️⃣</span>
                         <div>
-                            <div class="font-medium text-purple-800">Hesap Oluşturun</div>
-                            <div class="text-sm text-purple-600">Ücretsiz kayıt olun ve giriş yapın</div>
+                            <div class="font-medium text-purple-800">Üye Olun</div>
+                            <div class="text-sm text-purple-600">Ücretsiz hesap oluşturun</div>
                         </div>
                     </div>
                     <div class="flex items-start">
                         <span class="text-2xl mr-3">2️⃣</span>
                         <div>
-                            <div class="font-medium text-purple-800">Hayvan Profili Oluşturun</div>
-                            <div class="text-sm text-purple-600">Hayvanınızın tüm bilgilerini girin</div>
+                            <div class="font-medium text-purple-800">Hayvan Bilgilerini Kaydedin</div>
+                            <div class="text-sm text-purple-600">Fotoğraf, iletişim, sağlık bilgileri</div>
                         </div>
                     </div>
                     <div class="flex items-start">
                         <span class="text-2xl mr-3">3️⃣</span>
                         <div>
-                            <div class="font-medium text-purple-800">NFC Tag'a Yazın</div>
-                            <div class="text-sm text-purple-600">Oluşturulan linki NFC tag'ınıza yazın</div>
+                            <div class="font-medium text-purple-800">NFC Tag'a Link Yükleyin</div>
+                            <div class="text-sm text-purple-600">Özel linkinizi NFC etiketine yazın</div>
                         </div>
                     </div>
                     <div class="flex items-start">
                         <span class="text-2xl mr-3">4️⃣</span>
                         <div>
-                            <div class="font-medium text-purple-800">Takip Edin</div>
-                            <div class="text-sm text-purple-600">Kim ne zaman okutuyor, analitikleri görün</div>
+                            <div class="font-medium text-purple-800">Anlık Takip</div>
+                            <div class="text-sm text-purple-600">Kim okutuyor, nerede - canlı konum takibi</div>
                         </div>
                     </div>
                 </div>
@@ -1223,7 +1262,10 @@
                         <h1 class="text-4xl font-bold mb-2">${pet.name}</h1>
                         <p class="text-xl opacity-90">${pet.type} • ${pet.breed || 'Melez'}</p>
                         ${isPublicView ? 
-                            `<div class="mt-4 text-sm opacity-75">Bu hayvan kayıp mı? Lütfen aşağıdaki iletişim bilgilerini kullanın.</div>` :
+                            `<div class="mt-4 p-4 bg-red-100 border border-red-300 rounded-lg">
+                                <div class="text-red-800 font-bold text-lg mb-2">🚨 KAYIP HAYVAN BULUNDU!</div>
+                                <div class="text-red-700 text-sm">Bu hayvanı bulduysanız lütfen aşağıdaki iletişim bilgilerini kullanarak sahibiyle iletişime geçin. Konum bilginiz otomatik olarak sahibine iletilecektir.</div>
+                            </div>` :
                             `<button onclick="showDashboard()" class="mt-4 bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition">← Geri Dön</button>`
                         }
                     </div>
@@ -1300,10 +1342,10 @@
                                         <div class="bg-gray-50 p-4 rounded-lg">
                                             <p class="font-medium text-gray-800 mb-2">${pet.ownerName}</p>
                                             <div class="space-y-2">
-                                                <button onclick="trackCall('${pet.ownerPhone1}', ${pet.id})" class="flex items-center w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                                                    <span class="mr-2">📞</span> ${pet.ownerPhone1}
+                                                <button onclick="trackCall('${pet.ownerPhone1}', ${pet.id})" class="flex items-center w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition text-lg font-bold animate-pulse">
+                                                    <span class="mr-2">🚨</span> ACİL ARAMA: ${pet.ownerPhone1}
                                                 </button>
-                                                ${pet.ownerPhone2 ? `<button onclick="trackCall('${pet.ownerPhone2}', ${pet.id})" class="flex items-center w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"><span class="mr-2">📞</span> ${pet.ownerPhone2}</button>` : ''}
+                                                ${pet.ownerPhone2 ? `<button onclick="trackCall('${pet.ownerPhone2}', ${pet.id})" class="flex items-center w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition text-lg font-bold"><span class="mr-2">📞</span> YEDEK: ${pet.ownerPhone2}</button>` : ''}
                                                 ${pet.ownerEmail ? `<a href="mailto:${pet.ownerEmail}" class="flex items-center w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"><span class="mr-2">✉️</span> E-posta Gönder</a>` : ''}
                                                 ${pet.whatsappNumber ? `<a href="https://wa.me/${pet.whatsappNumber}" target="_blank" rel="noopener noreferrer" class="flex items-center w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"><span class="mr-2">💬</span> WhatsApp</a>` : ''}
                                             </div>
@@ -1323,8 +1365,8 @@
                                         <div class="bg-gray-50 p-4 rounded-lg">
                                             <p class="font-medium text-gray-700 mb-2">Adres:</p>
                                             <p class="text-gray-800">${pet.ownerAddress}</p>
-                                            <button onclick="trackLocation(${pet.id})" class="mt-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition w-full">
-                                                📍 Konumu Görüntüle
+                                            <button onclick="trackLocation(${pet.id})" class="mt-2 bg-orange-600 text-white px-4 py-3 rounded-lg hover:bg-orange-700 transition w-full font-bold">
+                                                📍 BULDUĞUM YER - Sahibine Konum Gönder
                                             </button>
                                         </div>
                                         ` : ''}
@@ -1375,9 +1417,21 @@
                             }
                         </div>
                         
-                        <div class="mt-8 text-center text-gray-500 text-sm">
-                            <p>Bu profil ${new Date(pet.createdAt).toLocaleDateString('tr-TR')} tarihinde oluşturulmuştur.</p>
-                            ${isPublicView ? '<p class="mt-2">Kayıp hayvanı bulduysanız lütfen yukarıdaki iletişim bilgilerini kullanarak sahipleriyle iletişime geçin.</p>' : ''}
+                        <div class="mt-8 text-center">
+                            ${isPublicView ? `
+                            <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6 mb-4">
+                                <h4 class="text-lg font-bold text-green-800 mb-3">🙏 Teşekkür Ederiz!</h4>
+                                <p class="text-green-700 mb-2">Bu kayıp hayvanı bulduğunuz için çok teşekkür ederiz.</p>
+                                <p class="text-green-600 text-sm">Lütfen yukarıdaki telefon numaralarından sahibini arayın ve buluşma noktası belirleyin.</p>
+                                <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                                    <p class="text-yellow-800 text-sm font-medium">⚠️ Güvenlik için buluşmayı kalabalık ve güvenli bir yerde yapın.</p>
+                                </div>
+                            </div>
+                            ` : ''}
+                            <div class="text-gray-500 text-sm">
+                                <p>Bu profil ${new Date(pet.createdAt).toLocaleDateString('tr-TR')} tarihinde oluşturulmuştur.</p>
+                                ${isPublicView ? '<p class="mt-2 text-xs">Bu sistem NFC teknolojisi ile kayıp hayvanları sahiplerine kavuşturmak için tasarlanmıştır.</p>' : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1520,12 +1574,16 @@
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
                 <div class="bg-white p-6 rounded-xl max-w-sm mx-4">
-                    <h3 class="text-lg font-bold mb-4">Arama Yapılıyor</h3>
-                    <p class="text-gray-600 mb-4">Şu numaraya yönlendiriliyorsunuz:</p>
-                    <p class="text-xl font-bold text-center mb-4">${phoneNumber}</p>
+                    <h3 class="text-lg font-bold mb-4 text-red-600">🚨 ACİL ARAMA</h3>
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-lg mb-4">
+                        <p class="text-red-800 font-bold mb-2">Kayıp Hayvan Sahibini Arıyorsunuz</p>
+                        <p class="text-red-700 text-sm">Bu arama otomatik olarak kayıt altına alınacak ve sahip bilgilendirilecektir.</p>
+                    </div>
+                    <p class="text-gray-600 mb-2">Aranacak numara:</p>
+                    <p class="text-xl font-bold text-center mb-4 bg-gray-100 p-2 rounded">${phoneNumber}</p>
                     <div class="flex space-x-4">
                         <button onclick="this.parentElement.parentElement.parentElement.remove()" class="flex-1 bg-gray-500 text-white py-2 rounded-lg">İptal</button>
-                        <button onclick="window.open('tel:${phoneNumber}'); this.parentElement.parentElement.parentElement.remove();" class="flex-1 bg-green-600 text-white py-2 rounded-lg">Ara</button>
+                        <button onclick="window.open('tel:${phoneNumber}'); this.parentElement.parentElement.parentElement.remove();" class="flex-1 bg-red-600 text-white py-2 rounded-lg font-bold">🚨 HEMEN ARA</button>
                     </div>
                 </div>
             `;
@@ -1537,12 +1595,18 @@
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
                 <div class="bg-white p-6 rounded-xl max-w-md mx-4">
-                    <h3 class="text-lg font-bold mb-4">📍 Konum Görüntüleme</h3>
-                    <p class="text-gray-600 mb-4">Konum bilginiz hayvan sahibi tarafından görülebilir. Bu sayede kayıp hayvanınızı bulduğunuz yer tespit edilebilir.</p>
-                    <div class="bg-blue-50 p-3 rounded-lg mb-4">
-                        <p class="text-sm text-blue-700">💡 <strong>Bilgi:</strong> Konum verileriniz sadece hayvan sahibi tarafından görülür ve güvenlik amacıyla kullanılır.</p>
+                    <h3 class="text-lg font-bold mb-4 text-orange-600">📍 Konum Sahibine Gönderildi!</h3>
+                    <div class="bg-green-50 border border-green-200 p-4 rounded-lg mb-4">
+                        <p class="text-green-800 font-bold mb-2">✅ Teşekkürler!</p>
+                        <p class="text-green-700 text-sm">Bulduğunuz konumu hayvan sahibine ilettik. Sahip artık hayvanının nerede bulunduğunu biliyor.</p>
                     </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="w-full bg-purple-600 text-white py-2 rounded-lg">Anladım</button>
+                    <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                        <p class="text-sm text-blue-700">💡 <strong>Güvenlik:</strong> Konum bilginiz sadece hayvan sahibi tarafından görülür ve kayıp hayvanı bulmak amacıyla kullanılır.</p>
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded-lg mb-4">
+                        <p class="text-sm text-yellow-700">📞 <strong>Önemli:</strong> Lütfen yukarıdaki telefon numaralarından sahibini arayarak hayvanı teslim etme konusunda anlaşın.</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="w-full bg-orange-600 text-white py-2 rounded-lg">Anladım</button>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -1623,5 +1687,5 @@
         // Initialize app on load
         init();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6ad0ff32498bc',t:'MTc2MDQ0MDcwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6afb2731c98bc',t:'MTc2MDQ0MDgxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
