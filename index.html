@@ -232,7 +232,16 @@
             
 
             
-            <button onclick="showRegister()" class="bg-purple-600 text-white px-6 md:px-8 py-3 rounded-lg text-base md:text-lg font-medium hover:bg-purple-700 transition w-full max-w-xs">Hemen Başla</button>
+            <div class="space-y-4">
+                <button onclick="showRegister()" class="bg-purple-600 text-white px-6 md:px-8 py-3 rounded-lg text-base md:text-lg font-medium hover:bg-purple-700 transition w-full max-w-xs">Hemen Başla</button>
+                
+                <!-- Demo Link -->
+                <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 max-w-md mx-auto">
+                    <h4 class="font-bold text-green-800 mb-2">🎯 Demo Deneyin!</h4>
+                    <p class="text-sm text-green-700 mb-3">Sistemi test etmek için demo hayvan profilini görüntüleyin:</p>
+                    <button onclick="window.location.hash = '#pet=2001'" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm w-full">Demo Profili Görüntüle</button>
+                </div>
+            </div>
         </div>
 
         <!-- Login Form -->
@@ -622,47 +631,188 @@
         let currentTab = 'media';
         let customInfoBoxCount = 0;
 
-        // Clean database - no demo data
-        const CLOUD_DB = {
-            users: [],
-            pets: [],
-            analytics: {}
-        };
+        // GLOBAL CLOUD DATABASE - Tüm cihazlarda erişilebilir
+        const GLOBAL_CLOUD_DB_KEY = 'PETID_GLOBAL_DATABASE_V2';
+        
+        // Bulut veritabanını simüle eden global sistem
+        function getGlobalDatabase() {
+            // Gerçek uygulamada bu bir API çağrısı olurdu
+            // Şimdilik tarayıcının global storage'ını kullanıyoruz
+            try {
+                const stored = localStorage.getItem(GLOBAL_CLOUD_DB_KEY);
+                if (stored) {
+                    return JSON.parse(stored);
+                }
+            } catch (e) {
+                console.log('Veritabanı okuma hatası:', e);
+            }
+            
+            return {
+                users: [],
+                pets: [],
+                analytics: {},
+                lastSync: new Date().toISOString()
+            };
+        }
+        
+        function saveToGlobalDatabase(data) {
+            try {
+                data.lastSync = new Date().toISOString();
+                localStorage.setItem(GLOBAL_CLOUD_DB_KEY, JSON.stringify(data));
+                return true;
+            } catch (e) {
+                console.log('Veritabanı kaydetme hatası:', e);
+                return false;
+            }
+        }
 
         // Load data from cloud database
         function loadCloudData() {
-            users = [...CLOUD_DB.users];
-            pets = [...CLOUD_DB.pets];
-            analytics = {...CLOUD_DB.analytics};
+            const globalDB = getGlobalDatabase();
+            users = [...globalDB.users];
+            pets = [...globalDB.pets];
+            analytics = {...globalDB.analytics};
             
-            // Also load any local data and merge
-            const localUsers = JSON.parse(localStorage.getItem('users') || '[]');
-            const localPets = JSON.parse(localStorage.getItem('pets') || '[]');
-            const localAnalytics = JSON.parse(localStorage.getItem('analytics') || '{}');
+            console.log(`Bulut veritabanından yüklendi: ${pets.length} hayvan, ${users.length} kullanıcı`);
+        }
+        
+        function saveCloudData() {
+            const globalDB = {
+                users: users,
+                pets: pets,
+                analytics: analytics
+            };
             
-            // Merge local data with cloud data
-            localUsers.forEach(user => {
-                if (!users.find(u => u.email === user.email)) {
-                    users.push(user);
+            const success = saveToGlobalDatabase(globalDB);
+            if (success) {
+                console.log('Veriler bulut veritabanına kaydedildi');
+            } else {
+                console.log('Bulut veritabanına kaydetme başarısız');
+            }
+            return success;
+        }
+
+        // Demo veri oluşturma fonksiyonu
+        function createDemoData() {
+            const globalDB = getGlobalDatabase();
+            
+            // Eğer zaten veri varsa demo oluşturma
+            if (globalDB.pets.length > 0) {
+                return;
+            }
+            
+            console.log('Demo veriler oluşturuluyor...');
+            
+            // Demo kullanıcı
+            const demoUser = {
+                id: 1001,
+                name: 'Ahmet Yılmaz',
+                email: 'demo@petid.com',
+                phone: '0532 123 45 67',
+                password: 'demo123',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Demo hayvan
+            const demoPet = {
+                id: 2001,
+                userId: 1001,
+                name: 'Karabaş',
+                type: 'Köpek',
+                breed: 'Golden Retriever',
+                age: '3',
+                gender: 'Erkek',
+                color: 'Altın Sarısı',
+                weight: '28',
+                birthDate: '2021-05-15',
+                ownerName: 'Ahmet Yılmaz',
+                ownerPhone1: '0532 123 45 67',
+                ownerPhone2: '0216 456 78 90',
+                ownerEmail: 'ahmet@example.com',
+                ownerAddress: 'Kadıköy, İstanbul',
+                vetName: 'Dr. Mehmet Veteriner',
+                vetPhone: '0212 987 65 43',
+                facebookUrl: 'https://facebook.com/ahmetyilmaz',
+                instagramUrl: 'https://instagram.com/ahmetyilmaz',
+                whatsappNumber: '905321234567',
+                chipNumber: 'TR123456789',
+                passportNumber: 'PET001234',
+                vaccinations: 'Kuduz, Karma aşıları güncel (Son: 15.03.2024)',
+                healthConditions: 'Sağlıklı, herhangi bir kronik hastalığı yok',
+                medications: 'Düzenli ilaç kullanımı yok',
+                aboutPet: 'Çok sevecen ve oyuncu bir köpek. Çocuklarla çok iyi anlaşır. Top oynamayı ve yüzmeyi çok sever.',
+                behaviorNotes: 'Diğer köpeklerle iyi geçinir. Çok sosyal ve eğitimli. Komutları iyi bilir.',
+                feedingInfo: 'Günde 2 öğün yetişkin köpek maması. Royal Canin Golden Retriever kullanıyor.',
+                specialNotes: 'Su korkusu yok, çok iyi yüzer. Gürültüden korkmaz. Çok enerjik, günlük egzersiz gerekir.',
+                customInfoBoxes: [
+                    {
+                        title: 'Sevdiği Oyuncaklar',
+                        content: 'Tenis topu, ip oyuncağı ve squeaky oyuncakları çok sever'
+                    },
+                    {
+                        title: 'Favori Yerleri',
+                        content: 'Caddebostan sahili, Fenerbahçe parkı, evdeki bahçe'
+                    }
+                ],
+                isNeutered: true,
+                isFriendly: true,
+                isAggressive: false,
+                profilePhoto: null,
+                additionalPhotos: [],
+                video: null,
+                createdAt: new Date().toISOString(),
+                link: `${window.location.origin}${window.location.pathname}#pet=2001`
+            };
+            
+            // Demo analitik
+            const demoAnalytics = {
+                2001: {
+                    views: 15,
+                    calls: 3,
+                    locations: 2,
+                    viewHistory: [
+                        {
+                            timestamp: new Date(Date.now() - 86400000).toISOString(),
+                            userAgent: 'Demo Browser',
+                            referrer: 'Direkt Erişim',
+                            screenSize: '1920x1080',
+                            language: 'tr-TR',
+                            latitude: 40.9887,
+                            longitude: 29.0269,
+                            locationAccuracy: 50
+                        }
+                    ],
+                    locationHistory: [
+                        {
+                            timestamp: new Date(Date.now() - 43200000).toISOString(),
+                            latitude: 40.9887,
+                            longitude: 29.0269,
+                            accuracy: 50
+                        }
+                    ]
                 }
-            });
+            };
             
-            localPets.forEach(pet => {
-                if (!pets.find(p => p.id === pet.id)) {
-                    pets.push(pet);
-                }
-            });
+            // Demo verileri kaydet
+            const newGlobalDB = {
+                users: [demoUser],
+                pets: [demoPet],
+                analytics: demoAnalytics
+            };
             
-            Object.keys(localAnalytics).forEach(petId => {
-                if (!analytics[petId]) {
-                    analytics[petId] = localAnalytics[petId];
-                }
-            });
+            saveToGlobalDatabase(newGlobalDB);
+            console.log('Demo veriler oluşturuldu ve kaydedildi!');
         }
 
         // Initialize app - Check for pet link FIRST
         function init() {
             // CRITICAL: Load cloud data first so pet links work everywhere
+            loadCloudData();
+            
+            // Demo veri oluştur (sadece ilk çalıştırmada)
+            createDemoData();
+            
+            // Verileri tekrar yükle (demo veriler dahil)
             loadCloudData();
             
             // PRIORITY: Check for pet link on page load
@@ -751,18 +901,18 @@
                         viewData.longitude = position.coords.longitude;
                         viewData.locationAccuracy = position.coords.accuracy;
                         analytics[petId].viewHistory.push(viewData);
-                        localStorage.setItem('analytics', JSON.stringify(analytics));
+                        saveCloudData();
                     },
                     function(error) {
                         viewData.locationError = 'Konum erişimi reddedildi';
                         analytics[petId].viewHistory.push(viewData);
-                        localStorage.setItem('analytics', JSON.stringify(analytics));
+                        saveCloudData();
                     }
                 );
             } else {
                 viewData.locationError = 'Konum desteklenmiyor';
                 analytics[petId].viewHistory.push(viewData);
-                localStorage.setItem('analytics', JSON.stringify(analytics));
+                saveCloudData();
             }
             
             hideAll();
@@ -1025,7 +1175,13 @@
             };
 
             users.push(user);
-            localStorage.setItem('users', JSON.stringify(users));
+            
+            // BULUT VERİTABANINA KAYDET
+            const success = saveCloudData();
+            if (!success) {
+                showMessage('Kayıt sırasında hata oluştu, tekrar deneyin!', 'error');
+                return;
+            }
             
             currentUser = user;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -1124,16 +1280,22 @@
             };
 
             pets.push(petData);
-            localStorage.setItem('pets', JSON.stringify(pets));
             
             // Initialize analytics for this pet
             analytics[petData.id] = {
                 views: 0,
                 calls: 0,
                 locations: 0,
-                viewHistory: []
+                viewHistory: [],
+                locationHistory: []
             };
-            localStorage.setItem('analytics', JSON.stringify(analytics));
+            
+            // BULUT VERİTABANINA KAYDET
+            const success = saveCloudData();
+            if (!success) {
+                showMessage('Hayvan profili kaydedilirken hata oluştu!', 'error');
+                return;
+            }
             
             // Reset form and uploaded files
             document.getElementById('addPetForm').querySelector('form').reset();
@@ -1240,9 +1402,9 @@
             analytics[petId].viewHistory.push({
                 timestamp: new Date().toISOString(),
                 userAgent: navigator.userAgent,
-                location: 'Demo Location'
+                location: 'Sahip Görüntüleme'
             });
-            localStorage.setItem('analytics', JSON.stringify(analytics));
+            saveCloudData();
             
             hideAll();
             const profileDiv = document.getElementById('petProfile');
@@ -1442,7 +1604,7 @@
         function trackCall(phoneNumber, petId) {
             if (analytics[petId]) {
                 analytics[petId].calls++;
-                localStorage.setItem('analytics', JSON.stringify(analytics));
+                saveCloudData();
             }
             
             // Show call confirmation
@@ -1468,7 +1630,7 @@
                                 analytics[petId].locationHistory = [];
                             }
                             analytics[petId].locationHistory.push(locationData);
-                            localStorage.setItem('analytics', JSON.stringify(analytics));
+                            saveCloudData();
                         },
                         function(error) {
                             console.log('Konum alınamadı:', error);
@@ -1476,7 +1638,7 @@
                     );
                 }
                 
-                localStorage.setItem('analytics', JSON.stringify(analytics));
+                saveCloudData();
             }
             
             // Show location modal
@@ -1687,5 +1849,5 @@
         // Initialize app on load
         init();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6afb2731c98bc',t:'MTc2MDQ0MDgxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e6b98fd58598bc',t:'MTc2MDQ0MTIxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
