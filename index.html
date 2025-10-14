@@ -1221,33 +1221,37 @@ async function fetchUserDataAndShowDashboard(userId) {
     }
 }
         // DÜZELTİLDİ: Kayıt İşlemi
-        async function handleRegister(e) {
-            e.preventDefault();
-            const name = e.target.elements[0].value;
-            const email = e.target.elements[1].value;
-            const phone = e.target.elements[2].value;
-            const password = e.target.elements[3].value;
-            
-            try {
-                // 1. Firebase Auth ile kullanıcı oluştur
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // 2. Firestore'a ek kullanıcı bilgilerini kaydet
-                await db.collection('users').doc(user.uid).set({
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    registrationDate: firebase.firestore.FieldValue.serverTimestamp()
-                });
+     // DÜZELTİLDİ: handleRegister (Kontrol Amaçlı)
+async function handleRegister(e) {
+    e.preventDefault();
+    const name = e.target.elements[0].value;
+    const email = e.target.elements[1].value;
+    const phone = e.target.elements[2].value;
+    const password = e.target.elements[3].value;
+    
+    try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Firestore'a ek kullanıcı bilgilerini kaydet
+        await db.collection('users').doc(user.uid).set({
+            name: name,
+            email: email,
+            phone: phone,
+            registrationDate: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-                hideModal('registerModal');
-                showNotification('Kayıt başarılı! Giriş yapılıyor...', 'success');
-                document.getElementById('registerForm').reset();
-            } catch (error) {
-                showNotification(`Kayıt hatası: ${error.message}`, 'error');
-            }
-        }
+        hideModal('registerModal');
+        showNotification('Kayıt başarılı! Giriş yapılıyor...', 'success');
+        document.getElementById('registerForm').reset();
+        
+        // Auth listener'ı otomatik olarak fetchUserDataAndShowDashboard'u çağıracaktır.
+        
+    } catch (error) {
+        // Hata durumunda Firebase Auth'tan gelen mesajı göster (örn: e-posta zaten kullanımda, şifre çok kısa)
+        showNotification(`Kayıt hatası: ${error.message}`, 'error');
+    }
+}
         
         // DÜZELTİLDİ: Giriş İşlemi
         async function handleLogin(e) {
@@ -1582,4 +1586,5 @@ async function fetchUserDataAndShowDashboard(userId) {
     </script>
 </body>
 </html>
+
 
