@@ -1,53 +1,4 @@
-<!-- Mevcut koda eklenecek -->
-<script>
-// Veri export/import fonksiyonları
-function exportUserData() {
-    const userData = {
-        users: JSON.parse(localStorage.getItem('patilink_users') || '[]'),
-        currentUser: currentUser,
-        userPets: pets,
-        userStats: petStats
-    };
-    
-    const blob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `patilink_${currentUser.email}_backup.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function importUserData(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const userData = JSON.parse(e.target.result);
-                
-                // Verileri localStorage'a yükle
-                localStorage.setItem('patilink_users', JSON.stringify(userData.users));
-                
-                // Kullanıcı verilerini yükle
-                if (userData.currentUser) {
-                    currentUser = userData.currentUser;
-                    pets = userData.userPets || [];
-                    petStats = userData.userStats || {};
-                    saveDataToStorage();
-                    showUserDashboard();
-                    showNotification('Veriler başarıyla yüklendi!', 'success');
-                }
-            } catch (error) {
-                showNotification('Dosya formatı hatalı!', 'error');
-            }
-        };
-        reader.readAsText(file);
-    }
-}
-</script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -147,9 +98,6 @@ function importUserData(event) {
         }
         .danger-zone {
             background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
-        }
-        .visitor-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
     </style>
 </head>
@@ -307,18 +255,9 @@ function importUserData(event) {
     <div id="userDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-3xl font-bold text-gray-900">Hayvanlarım</h2>
-            <div class="flex gap-4">
-                <button id="addPetBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium" onclick="showModal('addPetModal')">
-                    + Yeni Hayvan Ekle
-                </button>
-                <button onclick="exportUserData()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium">
-                    📥 Verilerimi İndir
-                </button>
-                <label class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium cursor-pointer">
-                    📤 Verileri Yükle
-                    <input type="file" accept=".json" onchange="importUserData(event)" class="hidden">
-                </label>
-            </div>
+            <button id="addPetBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium" onclick="showModal('addPetModal')">
+                + Yeni Hayvan Ekle
+            </button>
         </div>
         
         <div id="petsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -592,20 +531,6 @@ function importUserData(event) {
     <div id="petProfileView" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
         <div id="petProfileContent">
             <!-- Pet profile content will be loaded here -->
-        </div>
-    </div>
-
-    <!-- Visitor Tracking Modal -->
-    <div id="visitorModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">🌍 Ziyaretçi Takibi</h3>
-                <button onclick="hideModal('visitorModal')" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
-            </div>
-            
-            <div id="visitorContent">
-                <!-- Visitor tracking content will be loaded here -->
-            </div>
         </div>
     </div>
 
@@ -1257,80 +1182,6 @@ function importUserData(event) {
             }
         }
 
-        // Export user data for cross-device sync
-        function exportUserData() {
-            if (!currentUser) return;
-            
-            const exportData = {
-                user: currentUser,
-                pets: pets,
-                petStats: petStats,
-                exportDate: new Date().toISOString(),
-                version: '1.0'
-            };
-            
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `patilink_${currentUser.email.replace('@', '_')}_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showNotification('Verileriniz başarıyla indirildi! Bu dosyayı başka cihazlarda kullanabilirsiniz.', 'success');
-        }
-
-        // Import user data for cross-device sync
-        function importUserData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importData = JSON.parse(e.target.result);
-                    
-                    // Validate data structure
-                    if (!importData.user || !importData.pets || !importData.petStats) {
-                        throw new Error('Geçersiz dosya formatı');
-                    }
-                    
-                    // Check if user exists
-                    const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
-                    const existingUser = users.find(u => u.email === importData.user.email);
-                    
-                    if (!existingUser) {
-                        // Add user to system if doesn't exist
-                        users.push(importData.user);
-                        localStorage.setItem('patilink_users', JSON.stringify(users));
-                    }
-                    
-                    // Set current user and data
-                    currentUser = importData.user;
-                    pets = importData.pets;
-                    petStats = importData.petStats;
-                    
-                    // Save to localStorage
-                    saveDataToStorage();
-                    
-                    // Update UI
-                    showUserDashboard();
-                    updateNavigation();
-                    
-                    showNotification(`Veriler başarıyla yüklendi! ${pets.length} hayvan profili içe aktarıldı.`, 'success');
-                    
-                } catch (error) {
-                    showNotification('Dosya yüklenirken hata oluştu: ' + error.message, 'error');
-                }
-            };
-            reader.readAsText(file);
-            
-            // Reset file input
-            event.target.value = '';
-        }
-
         function initializeEventListeners() {
             // Modal controls - onclick handlers are already in HTML
             
@@ -1572,8 +1423,194 @@ function importUserData(event) {
         window.handleLoginClick = handleLoginClick;
         window.showModal = showModal;
         window.hideModal = hideModal;
-        window.exportUserData = exportUserData;
-        window.importUserData = importUserData;
+
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+        }
+
+        function switchEditTab(tabName) {
+            // Hide all edit tab contents
+            document.querySelectorAll('.edit-tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.edit-tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById('edit' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            currentEditTab = tabName;
+        }
+
+        function addPhoto() {
+            const url = document.getElementById('newPhotoUrl').value.trim();
+            if (url) {
+                photoGallery.push(url);
+                updatePhotoGallery();
+                document.getElementById('newPhotoUrl').value = '';
+            }
+        }
+
+        function addVideo() {
+            const url = document.getElementById('newVideoUrl').value.trim();
+            if (url) {
+                videoGallery.push(url);
+                updateVideoGallery();
+                document.getElementById('newVideoUrl').value = '';
+            }
+        }
+
+        function addEditPhoto() {
+            const url = document.getElementById('editNewPhotoUrl').value.trim();
+            if (url) {
+                editPhotoGallery.push(url);
+                updateEditPhotoGallery();
+                document.getElementById('editNewPhotoUrl').value = '';
+            }
+        }
+
+        function addEditVideo() {
+            const url = document.getElementById('editNewVideoUrl').value.trim();
+            if (url) {
+                editVideoGallery.push(url);
+                updateEditVideoGallery();
+                document.getElementById('editNewVideoUrl').value = '';
+            }
+        }
+
+        function updatePhotoGallery() {
+            const photoList = document.getElementById('photoList');
+            photoList.innerHTML = '';
+            
+            photoGallery.forEach((photo, index) => {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'relative';
+                photoDiv.innerHTML = `
+                    <img src="${photo}" alt="Photo ${index + 1}" class="w-full h-24 object-cover rounded-lg" onerror="this.parentElement.style.display='none'">
+                    <button type="button" onclick="removePhoto(${index})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs hover:bg-red-600">×</button>
+                `;
+                photoList.appendChild(photoDiv);
+            });
+        }
+
+        function updateVideoGallery() {
+            const videoList = document.getElementById('videoList');
+            videoList.innerHTML = '';
+            
+            videoGallery.forEach((video, index) => {
+                const videoDiv = document.createElement('div');
+                videoDiv.className = 'flex items-center justify-between bg-gray-100 p-2 rounded-lg';
+                videoDiv.innerHTML = `
+                    <span class="text-sm truncate flex-1">${video}</span>
+                    <button type="button" onclick="removeVideo(${index})" class="bg-red-500 text-white rounded-full w-6 h-6 text-xs hover:bg-red-600 ml-2">×</button>
+                `;
+                videoList.appendChild(videoDiv);
+            });
+        }
+
+        function updateEditPhotoGallery() {
+            const photoList = document.getElementById('editPhotoList');
+            photoList.innerHTML = '';
+            
+            editPhotoGallery.forEach((photo, index) => {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'relative';
+                photoDiv.innerHTML = `
+                    <img src="${photo}" alt="Photo ${index + 1}" class="w-full h-24 object-cover rounded-lg" onerror="this.parentElement.style.display='none'">
+                    <button type="button" onclick="removeEditPhoto(${index})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs hover:bg-red-600">×</button>
+                `;
+                photoList.appendChild(photoDiv);
+            });
+        }
+
+        function updateEditVideoGallery() {
+            const videoList = document.getElementById('editVideoList');
+            videoList.innerHTML = '';
+            
+            editVideoGallery.forEach((video, index) => {
+                const videoDiv = document.createElement('div');
+                videoDiv.className = 'flex items-center justify-between bg-gray-100 p-2 rounded-lg';
+                videoDiv.innerHTML = `
+                    <span class="text-sm truncate flex-1">${video}</span>
+                    <button type="button" onclick="removeEditVideo(${index})" class="bg-red-500 text-white rounded-full w-6 h-6 text-xs hover:bg-red-600 ml-2">×</button>
+                `;
+                videoList.appendChild(videoDiv);
+            });
+        }
+
+        function removePhoto(index) {
+            photoGallery.splice(index, 1);
+            updatePhotoGallery();
+        }
+
+        function removeVideo(index) {
+            videoGallery.splice(index, 1);
+            updateVideoGallery();
+        }
+
+        function removeEditPhoto(index) {
+            editPhotoGallery.splice(index, 1);
+            updateEditPhotoGallery();
+        }
+
+        function removeEditVideo(index) {
+            editVideoGallery.splice(index, 1);
+            updateEditVideoGallery();
+        }
+
+        function addCustomField() {
+            const customFieldsList = document.getElementById('customFieldsList');
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'flex gap-2';
+            fieldDiv.innerHTML = `
+                <input type="text" placeholder="Alan adı" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                <input type="text" placeholder="Değer" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600">×</button>
+            `;
+            customFieldsList.appendChild(fieldDiv);
+        }
+
+        function addEditCustomField() {
+            const customFieldsList = document.getElementById('editCustomFieldsList');
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'flex gap-2';
+            fieldDiv.innerHTML = `
+                <input type="text" placeholder="Alan adı" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                <input type="text" placeholder="Değer" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600">×</button>
+            `;
+            customFieldsList.appendChild(fieldDiv);
+        }
 
         function handleLogin(e) {
             e.preventDefault();
@@ -1597,46 +1634,6 @@ function importUserData(event) {
             }
         }
 
-        function handleRegister(e) {
-            e.preventDefault();
-            const name = e.target.elements[0].value;
-            const email = e.target.elements[1].value;
-            const phone = e.target.elements[2].value;
-            const password = e.target.elements[3].value;
-            
-            // Load existing users
-            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
-            
-            // Check if user already exists
-            if (users.find(u => u.email === email)) {
-                showNotification('Bu e-posta adresi zaten kayıtlı!', 'error');
-                return;
-            }
-            
-            // Create new user
-            const newUser = {
-                id: Date.now(),
-                name: name,
-                email: email,
-                phone: phone,
-                password: password,
-                registrationDate: new Date().toISOString()
-            };
-            
-            users.push(newUser);
-            localStorage.setItem('patilink_users', JSON.stringify(users));
-            
-            currentUser = newUser;
-            // Initialize empty data for new user
-            pets = [];
-            petStats = {};
-            saveDataToStorage();
-            hideModal('registerModal');
-            showUserDashboard();
-            showNotification('Kayıt başarılı! Hoş geldiniz!', 'success');
-            updateNavigation();
-        }
-
         function handleAddPet(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -1655,9 +1652,8 @@ function importUserData(event) {
                 }
             });
             
-            const petId = Date.now();
             const newPet = {
-                id: petId,
+                id: Date.now(),
                 name: formData.get('petName'),
                 type: formData.get('petType'),
                 breed: formData.get('breed'),
@@ -1693,11 +1689,11 @@ function importUserData(event) {
                 customFields: customFields,
                 owner: currentUser,
                 createdAt: new Date().toISOString(),
-                link: `${window.location.origin}${window.location.pathname}?pet=${petId}`
+                link: `${window.location.origin}${window.location.pathname}?pet=${Date.now()}`
             };
             
             pets.push(newPet);
-            petStats[newPet.id] = { views: 0, calls: 0, locations: [], visitors: [] };
+            petStats[newPet.id] = { views: 0, calls: 0, locations: [] };
             saveDataToStorage();
             
             hideModal('addPetModal');
@@ -1840,94 +1836,1031 @@ function importUserData(event) {
             showModal('editPetModal');
         }
 
-        // IP Geolocation tracking
-        async function trackVisitor(petId) {
-            try {
-                const response = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=b647e2a9739c445984120017ef0a3884`);
-                const locationData = await response.json();
-                
-                const visitor = {
-                    ip: locationData.ip,
-                    country: locationData.country_name,
-                    countryCode: locationData.country_code2,
-                    region: locationData.state_prov,
-                    city: locationData.city,
-                    latitude: locationData.latitude,
-                    longitude: locationData.longitude,
-                    timezone: locationData.time_zone.name,
-                    isp: locationData.isp,
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent
-                };
-                
-                // Find pet owner and save visitor data
-                const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
-                
-                for (const user of users) {
-                    const userDataKey = `patilink_user_${user.email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    const userData = localStorage.getItem(userDataKey);
-                    if (userData) {
-                        const data = JSON.parse(userData);
-                        const pet = (data.pets || []).find(p => p.id == petId);
-                        if (pet) {
-                            if (!data.petStats) data.petStats = {};
-                            if (!data.petStats[petId]) {
-                                data.petStats[petId] = { views: 0, calls: 0, locations: [], visitors: [] };
-                            }
-                            
-                            // Add visitor data (keep only last 50 visitors for performance)
-                            data.petStats[petId].visitors = data.petStats[petId].visitors || [];
-                            data.petStats[petId].visitors.push(visitor);
-                            if (data.petStats[petId].visitors.length > 50) {
-                                data.petStats[petId].visitors = data.petStats[petId].visitors.slice(-50);
-                            }
-                            
-                            localStorage.setItem(userDataKey, JSON.stringify(data));
-                            break;
+        function callOwner(phone, petId) {
+            // Find pet owner and update call stats
+            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+            
+            for (const user of users) {
+                const userDataKey = `patilink_user_${user.email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const userData = localStorage.getItem(userDataKey);
+                if (userData) {
+                    const data = JSON.parse(userData);
+                    const pet = (data.pets || []).find(p => p.id == petId);
+                    if (pet) {
+                        if (!data.petStats) data.petStats = {};
+                        if (!data.petStats[petId]) {
+                            data.petStats[petId] = { views: 0, calls: 0, locations: [] };
                         }
+                        data.petStats[petId].calls++;
+                        localStorage.setItem(userDataKey, JSON.stringify(data));
+                        break;
                     }
                 }
-            } catch (error) {
-                console.log('Visitor tracking failed:', error);
+            }
+            
+            // Open phone dialer
+            window.open(`tel:${phone}`, '_blank');
+        }
+
+        function shareLocation(petId) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const location = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            timestamp: new Date().toISOString(),
+                            accuracy: position.coords.accuracy
+                        };
+                        
+                        // Find pet owner and save location
+                        const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+                        
+                        for (const user of users) {
+                            const userDataKey = `patilink_user_${user.email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                            const userData = localStorage.getItem(userDataKey);
+                            if (userData) {
+                                const data = JSON.parse(userData);
+                                const pet = (data.pets || []).find(p => p.id == petId);
+                                if (pet) {
+                                    if (!data.petStats) data.petStats = {};
+                                    if (!data.petStats[petId]) {
+                                        data.petStats[petId] = { views: 0, calls: 0, locations: [] };
+                                    }
+                                    data.petStats[petId].locations.push(location);
+                                    localStorage.setItem(userDataKey, JSON.stringify(data));
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        showNotification('Konum başarıyla paylaşıldı! Sahip bilgilendirildi.', 'success');
+                    },
+                    (error) => {
+                        showNotification('Konum alınamadı. Lütfen konum izni verin.', 'error');
+                    }
+                );
+            } else {
+                showNotification('Tarayıcınız konum paylaşımını desteklemiyor.', 'error');
             }
         }
 
-        function showVisitorTracking(petId) {
-            const pet = pets.find(p => p.id === petId);
-            if (!pet) return;
+        function openImageModal(imageUrl) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="relative max-w-4xl max-h-full p-4">
+                    <img src="${imageUrl}" alt="Pet Photo" class="max-w-full max-h-full object-contain rounded-lg">
+                    <button onclick="this.closest('.fixed').remove()" class="absolute top-4 right-4 bg-white text-black rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-200">×</button>
+                </div>
+            `;
             
-            const stats = petStats[petId] || { views: 0, calls: 0, locations: [], visitors: [] };
-            const visitors = stats.visitors || [];
+            document.body.appendChild(modal);
             
-            // Calculate statistics
-            const totalVisitors = visitors.length;
-            const uniqueCountries = [...new Set(visitors.map(v => v.country))].length;
-            const uniqueCities = [...new Set(visitors.map(v => `${v.city}, ${v.country}`))].length;
-            const todayVisitors = visitors.filter(v => {
-                const visitDate = new Date(v.timestamp).toDateString();
-                const today = new Date().toDateString();
-                return visitDate === today;
-            }).length;
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification bg-white border-l-4 p-4 rounded-lg shadow-lg max-w-sm ${
+                type === 'success' ? 'border-green-500' : 
+                type === 'error' ? 'border-red-500' : 
+                'border-blue-500'
+            }`;
             
-            // Get country counts for flags
-            const countryCounts = {};
-            visitors.forEach(v => {
-                if (v.country && v.countryCode) {
-                    countryCounts[v.countryCode] = countryCounts[v.countryCode] || { name: v.country, count: 0 };
-                    countryCounts[v.countryCode].count++;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600">
+                        <span class="sr-only">Close</span>
+                        ×
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('notificationContainer').appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function updatePriceDisplay() {
+            document.getElementById('nfcPriceDisplay').textContent = `₺${adminSettings.nfcPrice}`;
+        }
+
+        function switchAdminTab(tabName) {
+            // Hide all admin tab contents
+            document.querySelectorAll('.admin-tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('text-purple-600', 'border-b-2', 'border-purple-600');
+                btn.classList.add('text-gray-500', 'hover:text-purple-600');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.remove('text-gray-500', 'hover:text-purple-600');
+            event.target.classList.add('text-purple-600', 'border-b-2', 'border-purple-600');
+        }
+
+        function updateAdminStats() {
+            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+            
+            // Collect all pets and stats from all users
+            let allPets = [];
+            let allStats = {};
+            
+            users.forEach(user => {
+                const userDataKey = `patilink_user_${user.email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const userData = localStorage.getItem(userDataKey);
+                if (userData) {
+                    const data = JSON.parse(userData);
+                    allPets = allPets.concat(data.pets || []);
+                    allStats = { ...allStats, ...(data.petStats || {}) };
                 }
             });
             
-            const visitorContent = document.getElementById('visitorContent');
-            visitorContent.innerHTML = `
-                <div class="mb-6">
-                    <h4 class="text-xl font-semibold mb-4">${pet.name} - Ziyaretçi İstatistikleri</h4>
+            const totalViews = Object.values(allStats).reduce((sum, stat) => sum + stat.views, 0);
+            const totalCalls = Object.values(allStats).reduce((sum, stat) => sum + stat.calls, 0);
+            const activePets = allPets.filter(pet => allStats[pet.id] && allStats[pet.id].views > 0).length;
+            
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalPets').textContent = allPets.length;
+            document.getElementById('activePets').textContent = activePets;
+            document.getElementById('totalViews').textContent = totalViews;
+            document.getElementById('totalCalls').textContent = totalCalls;
+        }
+
+        function renderUsersTable() {
+            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                const userPets = pets.filter(pet => pet.owner.email === user.email);
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-4 py-2">${user.id}</td>
+                    <td class="px-4 py-2">${user.name}</td>
+                    <td class="px-4 py-2">${user.email}</td>
+                    <td class="px-4 py-2">${user.phone}</td>
+                    <td class="px-4 py-2">${new Date(user.registrationDate).toLocaleDateString('tr-TR')}</td>
+                    <td class="px-4 py-2">${userPets.length}</td>
+                    <td class="px-4 py-2">
+                        <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-800 text-sm">Sil</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderPetsTable() {
+            const tbody = document.getElementById('petsTableBody');
+            tbody.innerHTML = '';
+            
+            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+            
+            // Collect all pets from all users
+            users.forEach(user => {
+                const userDataKey = `patilink_user_${user.email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const userData = localStorage.getItem(userDataKey);
+                if (userData) {
+                    const data = JSON.parse(userData);
+                    const userPets = data.pets || [];
+                    const userStats = data.petStats || {};
                     
-                    <!-- Stats Overview -->
-                    <div class="grid md:grid-cols-4 gap-4 mb-6">
-                        <div class="visitor-card text-white p-4 rounded-xl text-center">
-                            <div class="text-2xl font-bold">${totalVisitors}</div>
-                            <div class="text-sm">Toplam Ziyaretçi</div>
+                    userPets.forEach(pet => {
+                        const stats = userStats[pet.id] || { views: 0, calls: 0 };
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-50';
+                        row.innerHTML = `
+                            <td class="px-4 py-2">${pet.id}</td>
+                            <td class="px-4 py-2">${pet.name}</td>
+                            <td class="px-4 py-2">${pet.type}</td>
+                            <td class="px-4 py-2">${pet.owner.name}</td>
+                            <td class="px-4 py-2">${stats.views}</td>
+                            <td class="px-4 py-2">${stats.calls}</td>
+                            <td class="px-4 py-2">${new Date(pet.createdAt).toLocaleDateString('tr-TR')}</td>
+                            <td class="px-4 py-2">
+                                <button onclick="viewPetProfile(${pet.id})" class="text-blue-600 hover:text-blue-800 text-sm mr-2">Görüntüle</button>
+                                <button onclick="deleteAdminPet(${pet.id}, '${user.email}')" class="text-red-600 hover:text-red-800 text-sm">Sil</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            });
+        }
+
+        function updateAnalytics() {
+            // Today's stats
+            const today = new Date().toDateString();
+            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+            
+            const todayUsers = users.filter(user => new Date(user.registrationDate).toDateString() === today);
+            const todayPets = pets.filter(pet => new Date(pet.createdAt).toDateString() === today);
+            
+            document.getElementById('todayRegistrations').textContent = todayUsers.length;
+            document.getElementById('todayPets').textContent = todayPets.length;
+            document.getElementById('todayViews').textContent = '0'; // Would need to track daily views
+            document.getElementById('todayCalls').textContent = '0'; // Would need to track daily calls
+            
+            // Most popular
+            const sortedByViews = pets.sort((a, b) => (petStats[b.id]?.views || 0) - (petStats[a.id]?.views || 0));
+            const sortedByCalls = pets.sort((a, b) => (petStats[b.id]?.calls || 0) - (petStats[a.id]?.calls || 0));
+            
+            document.getElementById('mostViewedPet').textContent = sortedByViews[0]?.name || '-';
+            document.getElementById('mostCalledPet').textContent = sortedByCalls[0]?.name || '-';
+            
+            // Location stats
+            const totalLocations = Object.values(petStats).reduce((sum, stat) => sum + (stat.locations?.length || 0), 0);
+            document.getElementById('totalLocations').textContent = totalLocations;
+            document.getElementById('uniqueLocations').textContent = totalLocations; // Simplified
+            document.getElementById('avgLocationsPerPet').textContent = pets.length > 0 ? (totalLocations / pets.length).toFixed(1) : '0';
+        }
+
+        function loadAdminSettings() {
+            document.getElementById('salesPhone').value = adminSettings.salesPhone;
+            document.getElementById('supportEmail').value = adminSettings.supportEmail;
+            document.getElementById('nfcPrice').value = adminSettings.nfcPrice;
+            document.getElementById('shippingPrice').value = adminSettings.shippingPrice;
+            document.getElementById('commissionRate').value = adminSettings.commissionRate;
+            document.getElementById('minOrderQuantity').value = adminSettings.minOrderQuantity;
+            document.getElementById('bulkDiscount').value = adminSettings.bulkDiscount;
+            document.getElementById('freeShippingLimit').value = adminSettings.freeShippingLimit;
+            document.getElementById('allowRegistrations').checked = adminSettings.allowRegistrations;
+            document.getElementById('emailNotifications').checked = adminSettings.emailNotifications;
+            document.getElementById('smsNotifications').checked = adminSettings.smsNotifications;
+            document.getElementById('maintenanceMode').checked = adminSettings.maintenanceMode;
+        }
+
+        function saveSettings() {
+            adminSettings.salesPhone = document.getElementById('salesPhone').value;
+            adminSettings.supportEmail = document.getElementById('supportEmail').value;
+            adminSettings.nfcPrice = parseInt(document.getElementById('nfcPrice').value);
+            adminSettings.shippingPrice = parseInt(document.getElementById('shippingPrice').value);
+            adminSettings.commissionRate = parseInt(document.getElementById('commissionRate').value);
+            adminSettings.minOrderQuantity = parseInt(document.getElementById('minOrderQuantity').value);
+            adminSettings.bulkDiscount = parseInt(document.getElementById('bulkDiscount').value);
+            adminSettings.freeShippingLimit = parseInt(document.getElementById('freeShippingLimit').value);
+            adminSettings.allowRegistrations = document.getElementById('allowRegistrations').checked;
+            adminSettings.emailNotifications = document.getElementById('emailNotifications').checked;
+            adminSettings.smsNotifications = document.getElementById('smsNotifications').checked;
+            adminSettings.maintenanceMode = document.getElementById('maintenanceMode').checked;
+            
+            saveDataToStorage();
+            updatePriceDisplay();
+            showNotification('Ayarlar kaydedildi!', 'success');
+        }
+
+        function deleteUser(userId) {
+            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+            const updatedUsers = users.filter(user => user.id !== userId);
+            localStorage.setItem('patilink_users', JSON.stringify(updatedUsers));
+            renderUsersTable();
+            updateAdminStats();
+            showNotification('Kullanıcı silindi!', 'success');
+        }
+
+        function deleteAdminPet(petId, userEmail) {
+            const userDataKey = `patilink_user_${userEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const userData = localStorage.getItem(userDataKey);
+            
+            if (userData) {
+                const data = JSON.parse(userData);
+                data.pets = (data.pets || []).filter(p => p.id !== petId);
+                if (data.petStats && data.petStats[petId]) {
+                    delete data.petStats[petId];
+                }
+                localStorage.setItem(userDataKey, JSON.stringify(data));
+            }
+            
+            renderPetsTable();
+            updateAdminStats();
+            showNotification('Hayvan profili silindi!', 'success');
+        }
+
+        function exportData() {
+            const data = {
+                users: JSON.parse(localStorage.getItem('patilink_users') || '[]'),
+                pets: pets,
+                petStats: petStats,
+                adminSettings: adminSettings
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `patilink_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Veriler dışa aktarıldı!', 'success');
+        }
+
+        function clearOldData() {
+            if (confirm('30 günden eski verileri silmek istediğinizden emin misiniz?')) {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                
+                // Clear old pets
+                pets = pets.filter(pet => new Date(pet.createdAt) > thirtyDaysAgo);
+                
+                // Clear old users
+                const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+                const recentUsers = users.filter(user => new Date(user.registrationDate) > thirtyDaysAgo);
+                localStorage.setItem('patilink_users', JSON.stringify(recentUsers));
+                
+                saveDataToStorage();
+                showNotification('Eski veriler temizlendi!', 'success');
+                updateAdminStats();
+                renderUsersTable();
+                renderPetsTable();
+            }
+        }
+
+        function resetSystem() {
+            if (confirm('Tüm sistem verilerini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
+                if (confirm('Son kez soruyorum: TÜM VERİLER SİLİNECEK!')) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            }
+        }
+
+        // Make functions globally available
+        window.editPet = editPet;
+        window.deletePetConfirm = deletePetConfirm;
+        window.deletePet = deletePet;
+        window.viewPetProfile = viewPetProfile;
+        window.copyPetLink = copyPetLink;
+        window.callOwner = callOwner;
+        window.shareLocation = shareLocation;
+        window.openImageModal = openImageModal;
+        window.showWelcomeSection = showWelcomeSection;
+        window.switchAdminTab = switchAdminTab;
+        window.saveSettings = saveSettings;
+        window.deleteUser = deleteUser;
+        window.deleteAdminPet = deleteAdminPet;
+        window.exportData = exportData;
+        window.clearOldData = clearOldData;
+        window.resetSystem = resetSystem;
+        window.removePhoto = removePhoto;
+        window.removeVideo = removeVideo;
+        window.removeEditPhoto = removeEditPhoto;
+        window.removeEditVideo = removeEditVideo;
+        window.addPhoto = addPhoto;
+        window.addVideo = addVideo;
+        window.addEditPhoto = addEditPhoto;
+        window.addEditVideo = addEditVideo;
+        window.addCustomField = addCustomField;
+        window.addEditCustomField = addEditCustomField;
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = e.target.elements[0].value;
+            const email = e.target.elements[1].value;
+            const phone = e.target.elements[2].value;
+            const password = e.target.elements[3].value;
+            
+            // Load existing users
+            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+            
+            // Check if user already exists
+            if (users.find(u => u.email === email)) {
+                showNotification('Bu e-posta adresi zaten kayıtlı!', 'error');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                phone: phone,
+                password: password,
+                registrationDate: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('patilink_users', JSON.stringify(users));
+            
+            currentUser = newUser;
+            // Initialize empty data for new user
+            pets = [];
+            petStats = {};
+            saveDataToStorage();
+            hideModal('registerModal');
+            showUserDashboard();
+            showNotification('Kayıt başarılı! Hoş geldiniz!', 'success');
+            updateNavigation();
+        }
+
+        function updateNavigation() {
+            if (currentUser) {
+                document.getElementById('loginBtn').textContent = 'Çıkış Yap';
+                document.getElementById('registerBtn').style.display = 'none';
+            } else {
+                document.getElementById('loginBtn').textContent = 'Giriş Yap';
+                document.getElementById('registerBtn').style.display = 'block';
+            }
+        }
+
+        function showUserDashboard() {
+            document.getElementById('welcomeSection').classList.add('hidden');
+            document.getElementById('userDashboard').classList.remove('hidden');
+            document.getElementById('petProfileView').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            updateNavigation();
+            renderPetsList();
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('welcomeSection').classList.add('hidden');
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('petProfileView').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            
+            updateAdminStats();
+            renderUsersTable();
+            renderPetsTable();
+            updateAnalytics();
+            loadAdminSettings();
+        }
+
+        function showWelcomeSection() {
+            document.getElementById('welcomeSection').classList.remove('hidden');
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('petProfileView').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            // Clear URL parameters
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        function logout() {
+            currentUser = null;
+            pets = [];
+            petStats = {};
+            localStorage.removeItem('patilink_current_user');
+            
+            document.getElementById('welcomeSection').classList.remove('hidden');
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('petProfileView').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            updateNavigation();
+        }
+
+        function renderPetsList() {
+            const petsList = document.getElementById('petsList');
+            petsList.innerHTML = '';
+            
+            const userPets = pets.filter(pet => pet.owner.email === currentUser.email);
+            
+            if (userPets.length === 0) {
+                petsList.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-6xl mb-4">🐾</div>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Henüz hayvan profili oluşturmadınız</h3>
+                        <p class="text-gray-500 mb-6">İlk hayvan profilinizi oluşturmak için butona tıklayın</p>
+                        <button onclick="showModal('addPetModal')" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">
+                            🐾 İlk Profilimi Oluştur
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            userPets.forEach(pet => {
+                const stats = petStats[pet.id] || { views: 0, calls: 0 };
+                const petCard = document.createElement('div');
+                petCard.className = 'pet-card bg-white rounded-xl shadow-lg p-6';
+                
+                petCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-gray-900">${pet.name}</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="editPet(${pet.id})" class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50">
+                                ✏️
+                            </button>
+                            <button onclick="deletePetConfirm(${pet.id})" class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50">
+                                🗑️
+                            </button>
                         </div>
-                        <div class="visitor-card text-white p-4 rounded-xl text-center">
-                            <div class="text-2<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98edf755e48850f3',t:'MTc2MDUxNzE0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+                    </div>
+                    
+                    ${pet.photo ? `
+                        <div class="mb-4">
+                            <img src="${pet.photo}" alt="${pet.name}" class="w-full h-48 object-cover rounded-lg" onerror="this.style.display='none'">
+                        </div>
+                    ` : `
+                        <div class="mb-4 h-48 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
+                            <div class="text-6xl">${getAnimalEmoji(pet.type)}</div>
+                        </div>
+                    `}
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Tür:</span>
+                            <span class="font-medium">${pet.type}</span>
+                        </div>
+                        ${pet.breed ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Cins:</span>
+                                <span class="font-medium">${pet.breed}</span>
+                            </div>
+                        ` : ''}
+                        ${pet.birthDate ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Yaş:</span>
+                                <span class="font-medium">${calculateAge(pet.birthDate)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="stats-card text-white p-3 rounded-lg text-center">
+                            <div class="text-2xl font-bold">${stats.views}</div>
+                            <div class="text-sm">Görüntülenme</div>
+                        </div>
+                        <div class="location-card text-white p-3 rounded-lg text-center">
+                            <div class="text-2xl font-bold">${stats.calls}</div>
+                            <div class="text-sm">Arama</div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <button onclick="viewPetProfile(${pet.id})" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium">
+                            👁️ Profili Görüntüle
+                        </button>
+                        <button onclick="copyPetLink(${pet.id})" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium">
+                            🔗 Linki Kopyala
+                        </button>
+                        <div class="text-xs text-gray-500 text-center mt-2">
+                            Oluşturulma: ${new Date(pet.createdAt).toLocaleDateString('tr-TR')}
+                        </div>
+                    </div>
+                `;
+                
+                petsList.appendChild(petCard);
+            });
+        }
+
+        function getAnimalEmoji(type) {
+            const emojis = {
+                'köpek': '🐕',
+                'kedi': '🐱',
+                'kuş': '🐦',
+                'hamster': '🐹',
+                'tavşan': '🐰',
+                'balık': '🐠',
+                'diğer': '🐾'
+            };
+            return emojis[type] || '🐾';
+        }
+
+        function calculateAge(birthDate) {
+            const birth = new Date(birthDate);
+            const today = new Date();
+            const diffTime = Math.abs(today - birth);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 30) {
+                return `${diffDays} gün`;
+            } else if (diffDays < 365) {
+                const months = Math.floor(diffDays / 30);
+                return `${months} ay`;
+            } else {
+                const years = Math.floor(diffDays / 365);
+                const remainingMonths = Math.floor((diffDays % 365) / 30);
+                return remainingMonths > 0 ? `${years} yaş ${remainingMonths} ay` : `${years} yaş`;
+            }
+        }
+
+        function copyPetLink(petId) {
+            const pet = pets.find(p => p.id === petId);
+            if (pet) {
+                navigator.clipboard.writeText(pet.link).then(() => {
+                    showNotification('Link kopyalandı!', 'success');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = pet.link;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('Link kopyalandı!', 'success');
+                });
+            }
+        }
+
+        function deletePetConfirm(petId) {
+            const pet = pets.find(p => p.id === petId);
+            if (pet) {
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                        <h3 class="text-2xl font-bold mb-4 text-center">⚠️ Profili Sil</h3>
+                        <p class="text-gray-600 mb-6 text-center">
+                            <strong>${pet.name}</strong> adlı hayvanın profilini silmek istediğinizden emin misiniz?
+                            <br><br>
+                            Bu işlem geri alınamaz ve tüm veriler silinecektir.
+                        </p>
+                        <div class="flex gap-4">
+                            <button onclick="this.closest('.modal').remove()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded-lg">
+                                İptal
+                            </button>
+                            <button onclick="deletePet(${petId}); this.closest('.modal').remove();" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+                                Sil
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+        }
+
+        function deletePet(petId) {
+            pets = pets.filter(p => p.id !== petId);
+            delete petStats[petId];
+            saveDataToStorage();
+            renderPetsList();
+            showNotification('Hayvan profili silindi!', 'success');
+        }
+
+        function viewPetProfile(petId) {
+            showPetProfile(petId);
+        }
+
+        function showPetProfile(petId) {
+            // Search for pet in all users' data
+            const users = JSON.parse(localStorage.getItem('patilink_users') || '[]');
+            let foundPet = null;
+            let ownerEmail = null;
+            
+            for (const user of users) {
+                const userDataKey = `patilink_user_${user.email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const userData = localStorage.getItem(userDataKey);
+                if (userData) {
+                    const data = JSON.parse(userData);
+                    const pet = (data.pets || []).find(p => p.id == petId);
+                    if (pet) {
+                        foundPet = pet;
+                        ownerEmail = user.email;
+                        
+                        // Update view count
+                        if (!data.petStats) data.petStats = {};
+                        if (!data.petStats[pet.id]) {
+                            data.petStats[pet.id] = { views: 0, calls: 0, locations: [] };
+                        }
+                        data.petStats[pet.id].views++;
+                        localStorage.setItem(userDataKey, JSON.stringify(data));
+                        break;
+                    }
+                }
+            }
+            
+            if (!foundPet) {
+                showNotification('Hayvan profili bulunamadı!', 'error');
+                return;
+            }
+            
+            // Hide other sections
+            document.getElementById('welcomeSection').classList.add('hidden');
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('petProfileView').classList.remove('hidden');
+            
+            // Render pet profile
+            renderPetProfile(foundPet, ownerEmail);
+        }
+
+        function renderPetProfile(pet, ownerEmail) {
+            // Get stats from the owner's data
+            const userDataKey = `patilink_user_${ownerEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const userData = localStorage.getItem(userDataKey);
+            let stats = { views: 0, calls: 0, locations: [] };
+            
+            if (userData) {
+                const data = JSON.parse(userData);
+                stats = (data.petStats && data.petStats[pet.id]) || stats;
+            }
+            
+            const profileContent = document.getElementById('petProfileContent');
+            
+            profileContent.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <!-- Header -->
+                    <div class="gradient-bg text-white p-8 text-center">
+                        ${pet.photo ? `
+                            <img src="${pet.photo}" alt="${pet.name}" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-lg object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-lg bg-white flex items-center justify-center text-6xl" style="display: none;">
+                                ${getAnimalEmoji(pet.type)}
+                            </div>
+                        ` : `
+                            <div class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-lg bg-white flex items-center justify-center text-6xl">
+                                ${getAnimalEmoji(pet.type)}
+                            </div>
+                        `}
+                        <h1 class="text-4xl font-bold mb-2">${pet.name}</h1>
+                        <p class="text-xl opacity-90">${pet.type}${pet.breed ? ` • ${pet.breed}` : ''}</p>
+                        ${pet.description ? `<p class="mt-4 text-lg opacity-80">${pet.description}</p>` : ''}
+                    </div>
+                    
+                    <!-- Contact Buttons -->
+                    <div class="p-6 bg-gray-50">
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                            <button onclick="callOwner('${pet.owner.phone}', ${pet.id})" class="call-button text-white font-bold py-4 px-6 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all">
+                                📞 Sahibini Ara
+                            </button>
+                            <button onclick="shareLocation(${pet.id})" class="emergency-button text-white font-bold py-4 px-6 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all">
+                                📍 Konumumu Paylaş
+                            </button>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="stats-card text-white p-4 rounded-xl text-center">
+                                <div class="text-3xl font-bold">${stats.views}</div>
+                                <div class="text-sm">Görüntülenme</div>
+                            </div>
+                            <div class="location-card text-white p-4 rounded-xl text-center">
+                                <div class="text-3xl font-bold">${stats.calls}</div>
+                                <div class="text-sm">Arama</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pet Details -->
+                    <div class="p-6">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Basic Info -->
+                            <div>
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">🐾 Temel Bilgiler</h3>
+                                <div class="space-y-3">
+                                    ${pet.gender ? `
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Cinsiyet:</span>
+                                            <span class="font-medium">${pet.gender === 'erkek' ? '♂️ Erkek' : '♀️ Dişi'}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${pet.birthDate ? `
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Yaş:</span>
+                                            <span class="font-medium">${calculateAge(pet.birthDate)}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${pet.color ? `
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Renk:</span>
+                                            <span class="font-medium">${pet.color}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${pet.weight ? `
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Ağırlık:</span>
+                                            <span class="font-medium">${pet.weight} kg</span>
+                                        </div>
+                                    ` : ''}
+                                    ${pet.neutered ? `
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Kısırlaştırma:</span>
+                                            <span class="font-medium">${pet.neutered === 'evet' ? '✅ Kısırlaştırıldı' : '❌ Kısırlaştırılmadı'}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${pet.microchip ? `
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Mikroçip:</span>
+                                            <span class="font-medium text-xs">${pet.microchip}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <!-- Owner Info -->
+                            <div>
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">👤 Sahip Bilgileri</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between py-2 border-b border-gray-100">
+                                        <span class="text-gray-600">Ad Soyad:</span>
+                                        <span class="font-medium">${pet.owner.name}</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b border-gray-100">
+                                        <span class="text-gray-600">Telefon:</span>
+                                        <span class="font-medium">${pet.owner.phone}</span>
+                                    </div>
+                                    ${pet.vetName ? `
+                                        <div class="mt-4">
+                                            <h4 class="font-semibold text-gray-700 mb-2">🏥 Veteriner</h4>
+                                            <div class="text-sm space-y-1">
+                                                <div>${pet.vetName}</div>
+                                                ${pet.vetPhone ? `<div>📞 ${pet.vetPhone}</div>` : ''}
+                                                ${pet.vetAddress ? `<div>📍 ${pet.vetAddress}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Health Info -->
+                        ${pet.health || pet.emergencyInstructions || pet.lastVaccination ? `
+                            <div class="mt-8">
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">🏥 Sağlık Bilgileri</h3>
+                                <div class="bg-red-50 p-4 rounded-xl">
+                                    ${pet.health ? `<div class="mb-3"><strong>Sağlık Durumu:</strong> ${pet.health}</div>` : ''}
+                                    ${pet.emergencyInstructions ? `<div class="mb-3"><strong>Acil Durum:</strong> ${pet.emergencyInstructions}</div>` : ''}
+                                    ${pet.lastVaccination ? `<div><strong>Son Aşı:</strong> ${new Date(pet.lastVaccination).toLocaleDateString('tr-TR')}</div>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Photo Gallery -->
+                        ${pet.photoGallery && pet.photoGallery.length > 0 ? `
+                            <div class="mt-8">
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">📸 Fotoğraf Galerisi</h3>
+                                <div class="image-gallery">
+                                    ${pet.photoGallery.map(photo => `
+                                        <div class="gallery-item">
+                                            <img src="${photo}" alt="${pet.name}" class="w-full h-full object-cover" onclick="openImageModal('${photo}')" onerror="this.parentElement.style.display='none'">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Social Media -->
+                        ${pet.instagram || pet.facebook || pet.tiktok || pet.youtube ? `
+                            <div class="mt-8">
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">📱 Sosyal Medya</h3>
+                                <div class="flex flex-wrap gap-4">
+                                    ${pet.instagram ? `<a href="${pet.instagram}" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all">📷 Instagram</a>` : ''}
+                                    ${pet.facebook ? `<a href="${pet.facebook}" target="_blank" rel="noopener noreferrer" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all">📘 Facebook</a>` : ''}
+                                    ${pet.tiktok ? `<a href="${pet.tiktok}" target="_blank" rel="noopener noreferrer" class="bg-black text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all">🎵 TikTok</a>` : ''}
+                                    ${pet.youtube ? `<a href="${pet.youtube}" target="_blank" rel="noopener noreferrer" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all">📺 YouTube</a>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Additional Info -->
+                        ${pet.behavior || pet.feeding || pet.favoriteToy || pet.favoriteFood ? `
+                            <div class="mt-8">
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">ℹ️ Ek Bilgiler</h3>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    ${pet.behavior ? `
+                                        <div class="bg-blue-50 p-4 rounded-xl">
+                                            <h4 class="font-semibold mb-2">🎭 Davranış</h4>
+                                            <p class="text-sm">${pet.behavior}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${pet.feeding ? `
+                                        <div class="bg-green-50 p-4 rounded-xl">
+                                            <h4 class="font-semibold mb-2">🍽️ Beslenme</h4>
+                                            <p class="text-sm">${pet.feeding}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${pet.favoriteToy ? `
+                                        <div class="bg-yellow-50 p-4 rounded-xl">
+                                            <h4 class="font-semibold mb-2">🧸 Favori Oyuncak</h4>
+                                            <p class="text-sm">${pet.favoriteToy}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${pet.favoriteFood ? `
+                                        <div class="bg-orange-50 p-4 rounded-xl">
+                                            <h4 class="font-semibold mb-2">🦴 Favori Yemek</h4>
+                                            <p class="text-sm">${pet.favoriteFood}</p>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Special Notes -->
+                        ${pet.specialNotes ? `
+                            <div class="mt-8">
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">⚠️ Özel Notlar</h3>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                                    <p>${pet.specialNotes}</p>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Custom Fields -->
+                        ${pet.customFields && pet.customFields.length > 0 ? `
+                            <div class="mt-8">
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">📋 Diğer Bilgiler</h3>
+                                <div class="space-y-3">
+                                    ${pet.customFields.map(field => `
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">${field.label}:</span>
+                                            <span class="font-medium">${field.value}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Recent Locations -->
+                        ${stats.locations && stats.locations.length > 0 ? `
+                            <div class="mt-8">
+                                <h3 class="text-2xl font-bold mb-4 text-gray-800">📍 Son Görülen Konumlar</h3>
+                                <div class="space-y-3">
+                                    ${stats.locations.slice(-5).reverse().map(location => `
+                                        <div class="bg-blue-50 p-4 rounded-xl">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <div class="font-medium">📍 Konum Paylaşıldı</div>
+                                                    <div class="text-sm text-gray-600">${new Date(location.timestamp).toLocaleString('tr-TR')}</div>
+                                                </div>
+                                                <a href="https://maps.google.com/?q=${location.lat},${location.lng}" target="_blank" rel="noopener noreferrer" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                                    Haritada Gör
+                                                </a>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="bg-gray-50 p-6 text-center">
+                        <div class="mb-4">
+                            <button onclick="showWelcomeSection()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">
+                                ← Ana Sayfaya Dön
+                            </button>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            Bu profil <strong>PatiLink</strong> ile oluşturulmuştur<br>
+                            <a href="${window.location.origin}${window.location.pathname}" class="text-purple-600 hover:text-purple-800">Siz de ücretsiz profil oluşturun</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Make all functions globally available for onclick handlers
+        window.handleLoginClick = handleLoginClick;
+        window.showModal = showModal;
+        window.hideModal = hideModal;
+        window.switchTab = switchTab;
+        window.switchEditTab = switchEditTab;
+        window.addPhoto = addPhoto;
+        window.addVideo = addVideo;
+        window.addEditPhoto = addEditPhoto;
+        window.addEditVideo = addEditVideo;
+        window.removePhoto = removePhoto;
+        window.removeVideo = removeVideo;
+        window.removeEditPhoto = removeEditPhoto;
+        window.removeEditVideo = removeEditVideo;
+        window.addCustomField = addCustomField;
+        window.addEditCustomField = addEditCustomField;
+        window.editPet = editPet;
+        window.deletePetConfirm = deletePetConfirm;
+        window.deletePet = deletePet;
+        window.viewPetProfile = viewPetProfile;
+        window.copyPetLink = copyPetLink;
+        window.callOwner = callOwner;
+        window.shareLocation = shareLocation;
+        window.openImageModal = openImageModal;
+        window.showWelcomeSection = showWelcomeSection;
+        window.switchAdminTab = switchAdminTab;
+        window.saveSettings = saveSettings;
+        window.deleteUser = deleteUser;
+        window.deleteAdminPet = deleteAdminPet;
+        window.exportData = exportData;
+        window.clearOldData = clearOldData;
+        window.resetSystem = resetSystem;
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98edfa25160d50f3',t:'MTc2MDUxNzI2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
