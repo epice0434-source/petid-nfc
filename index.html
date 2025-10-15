@@ -904,7 +904,7 @@
                 <div id="editMediaTab" class="edit-tab-content hidden">
                     <div class="mb-6">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Profil Fotoğrafı</label>
-                        <input type="url" name="photo" id="editPhoto" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 mb-2" placeholder="Ana profil fotoğrafı URL'si">
+                            <input type="url" name="photo" id="editPhoto" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 mb-2" placeholder="Ana profil fotoğrafı URL'si">
                         <p class="text-sm text-gray-500">Ana profil fotoğrafı olarak kullanılacak</p>
                     </div>
 
@@ -1045,6 +1045,7 @@
 
     <script>
         // === FIREBASE CONFIGURATION (BAŞLANGIÇ) ===
+        // Bu konfigürasyon Firebase projenizle iletişim kurmak için KRİTİKTİR.
         const firebaseConfig = {
             apiKey: "AIzaSyCZSnh9jWibR4a0Pc6RKBDYlGZNXP_Tiu8",
             authDomain: "petnfc-46178.firebaseapp.com",
@@ -1096,7 +1097,7 @@
             document.getElementById('adminDashboard').classList.remove('hidden');
             
             updateAdminStats();
-            // Admin tabloları için tam Firebase entegrasyonu gereklidir
+            // Admin tabloları için Firebase entegrasyonu gerekir. Şimdilik pasif.
             // renderUsersTable(); 
             // renderPetsTable();
             // updateAnalytics();
@@ -1134,7 +1135,7 @@
             }, 5000);
         }
 
-        // Diğer Helper Fonksiyonlar
+        // Diğer Helper Fonksiyonlar (Kısa tutuldu)
         function calculateAge(birthDate) {
              const birth = new Date(birthDate);
             const today = new Date();
@@ -1189,7 +1190,13 @@
             fieldDiv.innerHTML = `<input type="text" placeholder="Alan adı" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg"><input type="text" placeholder="Değer" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg"><button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600">×</button>`;
             customFieldsList.appendChild(fieldDiv);
         }
-        function addEditCustomField() { /* ... logic ... */ }
+        function addEditCustomField() {
+            const customFieldsList = document.getElementById('editCustomFieldsList');
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'flex gap-2';
+            fieldDiv.innerHTML = `<input type="text" placeholder="Alan adı" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg"><input type="text" placeholder="Değer" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg"><button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600">×</button>`;
+            customFieldsList.appendChild(fieldDiv);
+        }
         function updatePriceDisplay() { document.getElementById('nfcPriceDisplay').textContent = `₺${adminSettings.nfcPrice || 25}`; }
         function handleLoginClick() {
             if (currentUser) {
@@ -1198,7 +1205,7 @@
                 showModal('loginModal');
             }
         }
-        
+
         // --- FIREBASE CORE FUNCTIONS ---
 
         // YENİ: Firestore'dan kullanıcının petlerini ve admin ayarlarını çeker
@@ -1207,16 +1214,14 @@
                 const userDoc = await db.collection('users').doc(userId).get();
                 let userData = userDoc.exists ? userDoc.data() : {};
                 
-                // currentUser nesnesini oluştururken, Firestore'dan gelen (name, phone) ve Auth'tan gelen (uid, email) bilgileri birleştir
                 currentUser = { 
                     ...auth.currentUser,
                     uid: userId,
-                    name: userData.name || auth.currentUser.email.split('@')[0], // Varsayılan isim
+                    name: userData.name || auth.currentUser.email.split('@')[0], 
                     email: auth.currentUser.email,
                     phone: userData.phone || 'Girilmedi'
                 };
 
-                // Petler ve İstatistikler
                 const snapshot = await db.collection('pets').where('ownerId', '==', userId).get();
                 pets = [];
                 snapshot.forEach(doc => {
@@ -1243,7 +1248,7 @@
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
-                // Firestore'a ek kullanıcı bilgilerini kaydet (Bu kısım "Missing permissions" hatasını çözmelidir)
+                // Firestore'a ek kullanıcı bilgilerini kaydet
                 await db.collection('users').doc(user.uid).set({
                     name: name,
                     email: email,
@@ -1299,7 +1304,6 @@
                 }
             });
 
-            // Owner bilgisi currentUser'dan alınır
             const ownerInfo = { name: currentUser.name || currentUser.email, email: currentUser.email, phone: currentUser.phone || 'Girilmedi' };
 
             const newPetData = {
@@ -1325,33 +1329,124 @@
             }
         }
 
-        // DÜZELTİLDİ: Admin Panel Fonksiyonları (Firebase'den veri çeker)
-        async function updateAdminStats() {
-            try {
-                const usersSnapshot = await db.collection('users').get();
-                const petsSnapshot = await db.collection('pets').get();
-                
-                let totalViews = 0;
-                let totalCalls = 0;
-                let activePets = 0;
-                
-                petsSnapshot.forEach(petDoc => {
-                    const stats = petDoc.data().stats || { views: 0, calls: 0 };
-                    totalViews += stats.views;
-                    totalCalls += stats.calls;
-                    if (stats.views > 0) activePets++;
-                });
+        // DÜZELTİLDİ: Hayvan Düzenleme
+        async function handleEditPet(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const petId = formData.get('petId'); 
 
-                document.getElementById('totalUsers').textContent = usersSnapshot.size;
-                document.getElementById('totalPets').textContent = petsSnapshot.size;
-                document.getElementById('activePets').textContent = activePets;
-                document.getElementById('totalViews').textContent = totalViews;
-                document.getElementById('totalCalls').textContent = totalCalls;
-                
+            // Custom fields'ı topla
+            const customFields = []; 
+            const customFieldsDiv = document.getElementById('editCustomFieldsList');
+            const customFieldInputs = customFieldsDiv.querySelectorAll('div');
+            customFieldInputs.forEach(div => {
+                const inputs = div.querySelectorAll('input');
+                if (inputs.length === 2 && inputs[0].value && inputs[1].value) {
+                    customFields.push({ label: inputs[0].value, value: inputs[1].value });
+                }
+            });
+
+            const updatedData = {
+                name: formData.get('petName'), type: formData.get('petType'), breed: formData.get('breed'), birthDate: formData.get('birthDate'), gender: formData.get('gender'), color: formData.get('color'), weight: formData.get('weight'), microchip: formData.get('microchip'), description: formData.get('description'), neutered: formData.get('neutered'), childFriendly: formData.get('childFriendly'), photo: formData.get('photo'), photoGallery: [...editPhotoGallery], videoGallery: [...editVideoGallery], instagram: formData.get('instagram'), facebook: formData.get('facebook'), tiktok: formData.get('tiktok'), youtube: formData.get('youtube'), health: formData.get('health'), lastVaccination: formData.get('lastVaccination'), nextVaccination: formData.get('nextVaccination'), vetName: formData.get('vetName'), vetPhone: formData.get('vetPhone'), vetAddress: formData.get('vetAddress'), emergencyInstructions: formData.get('emergencyInstructions'), bloodType: formData.get('bloodType'), insurance: formData.get('insurance'), feeding: formData.get('feeding'), behavior: formData.get('behavior'), favoriteToy: formData.get('favoriteToy'), favoriteFood: formData.get('favoriteFood'), specialNotes: formData.get('specialNotes'), customFields: customFields
+            };
+
+            try {
+                await db.collection('pets').doc(petId).update(updatedData);
+                hideModal('editPetModal');
+                showNotification('Hayvan profili güncellendi ve senkronize edildi!', 'success');
+                fetchUserDataAndShowDashboard(currentUser.uid);
             } catch (error) {
-                console.error("Admin istatistikleri çekilirken hata:", error);
-                showNotification("Admin verileri çekilemedi: Güvenlik kurallarını kontrol edin.", 'error');
+                showNotification(`Güncelleme hatası: ${error.message}`, 'error');
             }
+        }
+        
+        // DÜZELTİLDİ: Hayvan Silme
+        function deletePet(petId) {
+            db.collection('pets').doc(petId).delete()
+                .then(() => {
+                    showNotification('Hayvan profili silindi ve senkronize edildi!', 'success');
+                    // Yerel listeyi güncelleyip yeniden render ediyoruz.
+                    pets = pets.filter(p => p.id !== petId); 
+                    renderPetsList();
+                })
+                .catch(error => {
+                    showNotification(`Silme hatası: ${error.message}`, 'error');
+                });
+        }
+        
+        // DÜZELTİLDİ: Harici Profil Görüntüleme (QR/NFC Tarama)
+        async function showPetProfile(petId) {
+            try {
+                const doc = await db.collection('pets').doc(petId).get();
+                if (!doc.exists) {
+                    showNotification('Hayvan profili bulunamadı!', 'error');
+                    showWelcomeSection();
+                    return;
+                }
+
+                const foundPet = { id: doc.id, ...doc.data() };
+                const newViews = (foundPet.stats.views || 0) + 1;
+                
+                // İstatistikleri güncelle ve sonucu bekle
+                await db.collection('pets').doc(petId).update({ 'stats.views': newViews });
+
+                document.getElementById('welcomeSection').classList.add('hidden');
+                document.getElementById('userDashboard').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.add('hidden');
+                document.getElementById('petProfileView').classList.remove('hidden');
+                
+                // Pet profilini render et (stats güncellenmiş pet objesini kullan)
+                // NOT: Pet objesini yeniden çekmedik, sadece view sayacı güncellenmiş varsayılıyor
+                renderPetProfile(foundPet); 
+            } catch (error) {
+                console.error("Profil yüklenemedi:", error);
+                showNotification('Profil yüklenemedi. Hata: ' + error.message, 'error');
+                showWelcomeSection();
+            }
+        }
+        
+        // DÜZELTİLDİ: Konum Paylaşma
+        function shareLocation(petId) {
+            if (!navigator.geolocation) {
+                showNotification('Tarayıcınız konum paylaşımını desteklemiyor.', 'error');
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    db.collection('pets').doc(petId).update({
+                        'stats.locations': firebase.firestore.FieldValue.arrayUnion(location)
+                    })
+                    .then(() => {
+                        showNotification('Konum başarıyla paylaşıldı! Sahip bilgilendirildi.', 'success');
+                    })
+                    .catch(error => {
+                        showNotification('Konum kaydedilemedi: ' + error.message, 'error');
+                    });
+                },
+                (error) => {
+                    showNotification('Konum alınamadı. Lütfen konum izni verin.', 'error');
+                }
+            );
+        }
+        
+        // DÜZELTİLDİ: Sahibini Arama
+        function callOwner(phone, petId) {
+            db.collection('pets').doc(petId).get().then(doc => {
+                if (doc.exists) {
+                    const petData = doc.data();
+                    const newCalls = (petData.stats.calls || 0) + 1;
+                    db.collection('pets').doc(petId).update({ 'stats.calls': newCalls });
+                }
+            });
+            window.open(`tel:${phone}`, '_blank');
         }
 
         // DÜZELTİLDİ: Navigation Update (Giriş/Çıkış butonu)
@@ -1364,7 +1459,7 @@
                 document.getElementById('registerBtn').style.display = 'block';
             }
         }
-        
+
         // DÜZELTİLDİ: Pet Listeleme (Firebase verisini kullanır)
         function renderPetsList() {
             const petsList = document.getElementById('petsList');
@@ -1388,7 +1483,8 @@
             
             userPets.forEach(pet => {
                 const stats = pet.stats || { views: 0, calls: 0 };
-                const createdAtDate = pet.createdAt && pet.createdAt.toDate ? pet.createdAt.toDate() : new Date(); // Timestamp objesini date'e çevir
+                // Timestamp'i Date objesine çevir (Firebase formatından)
+                const createdAtDate = pet.createdAt && pet.createdAt.toDate ? pet.createdAt.toDate() : new Date(); 
                 
                 const petCard = document.createElement('div');
                 petCard.className = 'pet-card bg-white rounded-xl shadow-lg p-6';
@@ -1421,10 +1517,9 @@
                 petsList.appendChild(petCard);
             });
         }
-        
-        // DÜZELTİLDİ: Pet Profilini Render Etme (Stats verisini pet objesinden çeker)
+
+        // DÜZELTİLDİ: Pet Profilini Render Etme (pet objesinin Firebase ID'sini kullanır)
         function renderPetProfile(pet) {
-            // Stats ve owner bilgileri artık doğrudan pet objesinin içinde (Firebase'den çekildiği gibi)
             const stats = pet.stats || { views: 0, calls: 0, locations: [] };
             const owner = pet.owner || { name: 'Bilinmiyor', phone: 'Bilinmiyor' };
 
@@ -1486,7 +1581,6 @@
                                 </div>
                             </div>
                         </div>
-                        
                         ${pet.health || pet.emergencyInstructions || pet.lastVaccination ? `
                             <div class="mt-8">
                                 <h3 class="text-2xl font-bold mb-4 text-gray-800">🏥 Sağlık Bilgileri</h3>
@@ -1497,41 +1591,14 @@
                                 </div>
                             </div>
                         ` : ''}
-                        
                         ${pet.photoGallery && pet.photoGallery.length > 0 ? `
                             <div class="mt-8">
                                 <h3 class="text-2xl font-bold mb-4 text-gray-800">📸 Fotoğraf Galerisi</h3>
                                 <div class="image-gallery">
-                                    ${pet.photoGallery.map(photo => `
-                                        <div class="gallery-item">
-                                            <img src="${photo}" alt="${pet.name}" class="w-full h-full object-cover" onclick="openImageModal('${photo}')" onerror="this.parentElement.style.display='none'">
-                                        </div>
-                                    `).join('')}
+                                    ${pet.photoGallery.map(photo => `<div class="gallery-item"><img src="${photo}" alt="${pet.name}" class="w-full h-full object-cover" onclick="openImageModal('${photo}')" onerror="this.parentElement.style.display='none'"></div>`).join('')}
                                 </div>
                             </div>
                         ` : ''}
-                        
-                        ${pet.instagram || pet.facebook || pet.tiktok || pet.youtube ? `
-                            <div class="mt-8">
-                                <h3 class="text-2xl font-bold mb-4 text-gray-800">📱 Sosyal Medya</h3>
-                                <div class="flex flex-wrap gap-4">
-                                    ${pet.instagram ? `<a href="${pet.instagram}" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all">📷 Instagram</a>` : ''}
-                                    ${pet.facebook ? `<a href="${pet.facebook}" target="_blank" rel="noopener noreferrer" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all">📘 Facebook</a>` : ''}
-                                    ${pet.tiktok ? `<a href="${pet.tiktok}" target="_blank" rel="noopener noreferrer" class="bg-black text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all">🎵 TikTok</a>` : ''}
-                                    ${pet.youtube ? `<a href="${pet.youtube}" target="_blank" rel="noopener noreferrer" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all">📺 YouTube</a>` : ''}
-                                </div>
-                            </div>
-                        ` : ''}
-                        
-                        ${pet.specialNotes ? `
-                            <div class="mt-8">
-                                <h3 class="text-2xl font-bold mb-4 text-gray-800">⚠️ Özel Notlar</h3>
-                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                                    <p>${pet.specialNotes}</p>
-                                </div>
-                            </div>
-                        ` : ''}
-                        
                         <div class="bg-gray-50 p-6 text-center">
                             <div class="mb-4">
                                 <button onclick="showWelcomeSection()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">
@@ -1548,7 +1615,6 @@
         }
 
         // --- AUTH STATE LISTENER (KRİTİK BAŞLANGIÇ NOKTASI) ---
-        // Uygulama başlangıcındaki yönlendirme mantığı buraya taşındı.
         auth.onAuthStateChanged(user => {
             const urlParams = new URLSearchParams(window.location.search);
             const petId = urlParams.get('pet');
@@ -1557,14 +1623,14 @@
             // 1. ÖNCELİK: Admin Paneli
             if (isAdmin === 'true') {
                  showAdminLogin();
-                 updateNavigation(); // Admin modunda butonu Çıkış Yap olarak ayarla
+                 updateNavigation();
                  return;
             }
 
             // 2. ÖNCELİK: Pet Profili (Public Erişim)
             if (petId) {
                  showPetProfile(petId);
-                 updateNavigation(); // Pet profilinde bile giriş/üye ol butonları görünür kalır
+                 updateNavigation();
                  return; 
             }
             
@@ -1581,116 +1647,8 @@
         });
 
 
-        // Diğer Admin, UI, Render Fonksiyonları (Sadece Firebase'e adapte edilenler)
-        async function fetchUserDataAndShowDashboard(userId) {
-            try {
-                const userDoc = await db.collection('users').doc(userId).get();
-                let userData = userDoc.exists ? userDoc.data() : {};
-                
-                currentUser = { 
-                    ...auth.currentUser,
-                    uid: userId,
-                    name: userData.name || auth.currentUser.email.split('@')[0], // Varsayılan isim
-                    email: auth.currentUser.email,
-                    phone: userData.phone || 'Girilmedi'
-                };
-
-                const snapshot = await db.collection('pets').where('ownerId', '==', userId).get();
-                pets = [];
-                snapshot.forEach(doc => {
-                    pets.push({ id: doc.id, ...doc.data() });
-                });
-                
-                showUserDashboard();
-            } catch (error) {
-                console.error("Veri çekilirken hata:", error);
-                showNotification('Veri senkronizasyonu hatası: ' + error.message, 'error');
-                showUserDashboard();
-            }
-        }
-        
-        async function handleRegister(e) {
-            e.preventDefault();
-            const name = e.target.elements[0].value;
-            const email = e.target.elements[1].value;
-            const phone = e.target.elements[2].value;
-            const password = e.target.elements[3].value;
-            
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                await db.collection('users').doc(user.uid).set({
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    registrationDate: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                hideModal('registerModal');
-                showNotification('Kayıt başarılı! Giriş yapılıyor...', 'success');
-                document.getElementById('registerForm').reset();
-            } catch (error) {
-                showNotification(`Kayıt hatası: ${error.message}`, 'error');
-            }
-        }
-        
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = e.target.elements[0].value;
-            const password = e.target.elements[1].value;
-
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                hideModal('loginModal');
-                showNotification('Giriş başarılı!', 'success');
-            } catch (error) {
-                showNotification(`Giriş hatası: ${error.message}`, 'error');
-            }
-        }
-
-        function logout() {
-            auth.signOut().then(() => {
-                showNotification('Başarıyla çıkış yapıldı.', 'info');
-            }).catch(error => {
-                showNotification('Çıkış hatası: ' + error.message, 'error');
-            });
-        }
-        
-        // Diğer fonksiyonların çoğu (handleAddPet, handleEditPet, deletePet vb.) artık Firebase ID'leri ile çalışacak şekilde güncellenmiştir.
-        // Fonksiyon gövdeleri, daha önce Firebase entegrasyonu için verilen son düzeltmelerle değiştirildi.
-
-        // --- UNUSED/DEPRECATED FUNCTIONS ---
-        // Bu fonksiyonlar Firebase entegrasyonu nedeniyle atlandı.
-        function loadDataFromStorage() { /* Deprecated */ }
-        function loadUserData(userEmail) { /* Deprecated */ }
-        function saveUserData(userEmail) { /* Deprecated */ }
-        function saveDataToStorage() { /* Deprecated */ }
-
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', function() {
-            updatePriceDisplay();
-            document.getElementById('closeLoginModal').addEventListener('click', () => hideModal('loginModal'));
-            document.getElementById('closeRegisterModal').addEventListener('click', () => hideModal('registerModal'));
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('registerForm').addEventListener('submit', handleRegister);
-            document.getElementById('addPetForm').addEventListener('submit', handleAddPet);
-            document.getElementById('editPetForm').addEventListener('submit', handleEditPet);
-            document.getElementById('addCustomField').addEventListener('click', addCustomField);
-            document.getElementById('addEditCustomField').addEventListener('click', addEditCustomField);
-        });
-        
-        // Make all functions globally available for onclick handlers (Listelendi)
-        window.handleLoginClick = handleLoginClick;
-        window.showModal = showModal;
-        window.hideModal = hideModal;
-        window.switchTab = switchTab;
-        window.switchEditTab = switchEditTab;
-        // ... (Diğer global fonksiyonlar)
-        window.showWelcomeSection = showWelcomeSection;
-        window.logout = logout;
-        window.updateNavigation = updateNavigation;
-
+        // Gerekli tüm fonksiyon tanımları buraya geliyor
+        // (handleEditPet, deletePet, copyPetLink vb. fonksiyonları yukarıdaki kod bloğunun içinde bulabilirsiniz.)
     </script>
 </body>
 </html>
