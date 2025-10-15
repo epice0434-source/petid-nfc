@@ -655,6 +655,19 @@
         </div>
     </div>
 
+    <!-- Locations Modal -->
+    <div id="locationsModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">📍 Gönderilen Konumlar</h3>
+                <button id="closeLocationsModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div id="locationsContent">
+                <!-- Locations will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Container -->
     <div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2">
         <!-- Notifications will be added here -->
@@ -829,6 +842,11 @@
             document.getElementById('closeAddPetModal').addEventListener('click', function(e) {
                 e.preventDefault();
                 hideModal('addPetModal');
+            });
+            
+            document.getElementById('closeLocationsModal').addEventListener('click', function(e) {
+                e.preventDefault();
+                hideModal('locationsModal');
             });
             
             // Dashboard buttons
@@ -1189,9 +1207,9 @@
                             <div class="text-2xl font-bold text-purple-600">${stats.visitors ? stats.visitors.length : 0}</div>
                             <div class="text-sm text-gray-600">Ziyaretçi</div>
                         </div>
-                        <div class="text-center p-3 bg-orange-50 rounded-lg">
+                        <div class="text-center p-3 bg-orange-50 rounded-lg cursor-pointer" onclick="showLocations('${pet.id}')">
                             <div class="text-2xl font-bold text-orange-600">${stats.locations ? stats.locations.length : 0}</div>
-                            <div class="text-sm text-gray-600">Konum</div>
+                            <div class="text-sm text-gray-600">Konum 📍</div>
                         </div>
                     </div>
                     
@@ -1654,6 +1672,147 @@
             }, 5000);
         }
 
+        async function showLocations(petId) {
+            try {
+                const petDoc = await window.firestoreGetDoc(window.firestoreDoc(window.firebaseDb, 'pets', petId));
+                if (!petDoc.exists()) {
+                    showNotification('Hayvan profili bulunamadı!', 'error');
+                    return;
+                }
+                
+                const pet = petDoc.data();
+                const locations = pet.stats?.locations || [];
+                
+                const locationsContent = document.getElementById('locationsContent');
+                
+                if (locations.length === 0) {
+                    locationsContent.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-6xl mb-4">📍</div>
+                            <h3 class="text-xl font-semibold text-gray-600 mb-2">Henüz konum gönderilmedi</h3>
+                            <p class="text-gray-500">Hayvanınızı bulan kişiler konum gönderdiğinde burada görünecek.</p>
+                        </div>
+                    `;
+                } else {
+                    locationsContent.innerHTML = `
+                        <div class="mb-6">
+                            <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                                <h4 class="font-semibold text-blue-800 mb-2">📊 Konum İstatistikleri</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span class="font-medium">Toplam Konum:</span> ${locations.length}
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">İlk Konum:</span> ${new Date(locations[0].timestamp).toLocaleDateString('tr-TR')}
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Son Konum:</span> ${new Date(locations[locations.length - 1].timestamp).toLocaleDateString('tr-TR')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4 max-h-96 overflow-y-auto">
+                            ${locations.slice().reverse().map((location, index) => `
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
+                                                #${locations.length - index}
+                                            </span>
+                                            <span class="text-sm text-gray-600">
+                                                ${new Date(location.timestamp).toLocaleString('tr-TR')}
+                                            </span>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="openInMaps(${location.lat}, ${location.lng})" 
+                                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs">
+                                                🗺️ Haritada Aç
+                                            </button>
+                                            <button onclick="copyCoordinates(${location.lat}, ${location.lng})" 
+                                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
+                                                📋 Kopyala
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <span class="font-medium text-gray-700">Enlem:</span>
+                                            <span class="text-gray-600">${location.lat.toFixed(6)}</span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-700">Boylam:</span>
+                                            <span class="text-gray-600">${location.lng.toFixed(6)}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3 pt-3 border-t border-gray-100">
+                                        <div class="flex flex-wrap gap-2">
+                                            <a href="https://www.google.com/maps?q=${location.lat},${location.lng}" 
+                                               target="_blank" 
+                                               class="text-blue-600 hover:text-blue-800 text-xs underline">
+                                                Google Maps
+                                            </a>
+                                            <a href="https://maps.apple.com/?q=${location.lat},${location.lng}" 
+                                               target="_blank" 
+                                               class="text-blue-600 hover:text-blue-800 text-xs underline">
+                                                Apple Maps
+                                            </a>
+                                            <a href="https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}&zoom=15" 
+                                               target="_blank" 
+                                               class="text-blue-600 hover:text-blue-800 text-xs underline">
+                                                OpenStreetMap
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                            <h4 class="font-semibold text-yellow-800 mb-2">💡 İpucu</h4>
+                            <p class="text-sm text-yellow-700">
+                                Konumları haritada görüntülemek için "Haritada Aç" butonunu kullanın. 
+                                Koordinatları kopyalayarak başka uygulamalarda da kullanabilirsiniz.
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                showModal('locationsModal');
+                
+            } catch (error) {
+                console.error('Error loading locations:', error);
+                showNotification('Konumlar yüklenirken hata oluştu!', 'error');
+            }
+        }
+
+        function openInMaps(lat, lng) {
+            // Try to open in the most appropriate maps app
+            const userAgent = navigator.userAgent;
+            
+            if (/iPad|iPhone|iPod/.test(userAgent)) {
+                // iOS device - try Apple Maps first
+                window.open(`maps://maps.apple.com/?q=${lat},${lng}`, '_blank');
+            } else if (/Android/.test(userAgent)) {
+                // Android device - try Google Maps app
+                window.open(`geo:${lat},${lng}`, '_blank');
+            } else {
+                // Desktop or other - open Google Maps in browser
+                window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+            }
+        }
+
+        function copyCoordinates(lat, lng) {
+            const coordinates = `${lat}, ${lng}`;
+            navigator.clipboard.writeText(coordinates).then(() => {
+                showNotification('Koordinatlar kopyalandı!', 'success');
+            }).catch(() => {
+                showNotification('Koordinatlar kopyalanamadı!', 'error');
+            });
+        }
+
         // Global functions for onclick handlers
         window.showModal = showModal;
         window.hideModal = hideModal;
@@ -1665,6 +1824,9 @@
         window.removePhoto = removePhoto;
         window.callOwner = callOwner;
         window.sendLocation = sendLocation;
+        window.showLocations = showLocations;
+        window.openInMaps = openInMaps;
+        window.copyCoordinates = copyCoordinates;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ee8bdb43bde00b',t:'MTc2MDUyMzIzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ee8e331105e00b',t:'MTc2MDUyMzMyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
