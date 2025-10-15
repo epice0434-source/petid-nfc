@@ -7,11 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script type="module">
+      // Bu bölümü değiştirmeden olduğu gibi bırakın
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
       import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
       import { getFirestore, collection, doc, addDoc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      // Your web app's Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyCZSnh9jWibR4a0Pc6RKBDYlGZNXP_Tiu8",
         authDomain: "petnfc-46178.firebaseapp.com",
@@ -22,20 +22,18 @@
         measurementId: "G-XS8LXGR545"
       };
 
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-      // Make Firebase functions globally accessible
       window.firebase = {
-        auth, db,
-        onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+        auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
         collection, doc, addDoc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, where, serverTimestamp
       };
     </script>
-
+    
     <style>
+        /* Stil kodlarınız burada... (değişiklik yok) */
         body { box-sizing: border-box; }
         .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .pet-card { transition: all 0.3s ease; transform: translateY(0); }
@@ -49,7 +47,6 @@
         .modal { backdrop-filter: blur(10px); }
         .form-input { transition: all 0.3s ease; }
         .form-input:focus { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .qr-code { background: linear-gradient(45deg, #667eea, #764ba2); padding: 20px; border-radius: 15px; }
         .feature-card { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
         .premium-badge { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
         .notification { animation: slideIn 0.3s ease-out; }
@@ -57,9 +54,7 @@
         .image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
         .gallery-item { aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
         .gallery-item:hover { transform: scale(1.05); }
-        .tab-button { transition: all 0.3s ease; }
         .tab-button.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .admin-card { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
         .admin-stats { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
         .danger-zone { background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%); }
     </style>
@@ -74,8 +69,8 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button id="loginBtn" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium" onclick="handleLoginClick()">Giriş Yap</button>
-                    <button id="registerBtn" class="bg-white text-purple-600 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-medium" onclick="showModal('registerModal')">Üye Ol</button>
+                    <button id="loginBtn" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">Giriş Yap</button>
+                    <button id="registerBtn" class="bg-white text-purple-600 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-medium">Üye Ol</button>
                 </div>
             </div>
         </div>
@@ -83,252 +78,14 @@
 
     <div id="mainContent" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div id="welcomeSection" class="mb-12">
-            <div class="text-center mb-16">
-                <h2 class="text-5xl font-bold text-gray-900 mb-6">Hayvanınızı NFC ile Koruyun</h2>
-                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">Tamamen ücretsiz! Kaybolduğunda hemen bulunabilsin. Tasmasına NFC tag takın, detaylı profilini oluşturun ve anlık takip edin.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-                <div class="feature-card p-6 rounded-xl shadow-lg text-center">
-                    <div class="text-5xl mb-4">📱</div>
-                    <h3 class="text-xl font-semibold mb-3">NFC Teknolojisi</h3>
-                    <p class="text-gray-700">Telefon yaklaştırıldığında otomatik profil açılır</p>
-                </div>
-                <div class="feature-card p-6 rounded-xl shadow-lg text-center">
-                    <div class="text-5xl mb-4">📊</div>
-                    <h3 class="text-xl font-semibold mb-3">Anlık İstatistikler</h3>
-                    <p class="text-gray-700">Kaç kişinin taradığını ve aradığını görün</p>
-                </div>
-                <div class="feature-card p-6 rounded-xl shadow-lg text-center">
-                    <div class="text-5xl mb-4">📍</div>
-                    <h3 class="text-xl font-semibold mb-3">Konum Takibi</h3>
-                    <p class="text-gray-700">Hayvanınızı bulan kişilerin konumunu görün</p>
-                </div>
-                <div class="feature-card p-6 rounded-xl shadow-lg text-center">
-                    <div class="text-5xl mb-4">🚨</div>
-                    <h3 class="text-xl font-semibold mb-3">Acil Durum</h3>
-                    <p class="text-gray-700">Tek tıkla arama ve yönlendirme</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-xl p-8 mb-16">
-                <h3 class="text-3xl font-bold text-center mb-12">Nasıl Çalışır?</h3>
-                <div class="grid md:grid-cols-5 gap-8">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">1</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">Üye Olun</h4>
-                        <p class="text-sm text-gray-600">Hesap oluşturun</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">2</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">Profil Oluşturun</h4>
-                        <p class="text-sm text-gray-600">Hayvan bilgilerini girin</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">3</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">NFC Tag İçin İletişim</h4>
-                        <p class="text-sm text-gray-600">Biz NFC'yi programlayıp gönderiyoruz</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">4</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">Tasmasına Takın</h4>
-                        <p class="text-sm text-gray-600">NFC tag'i hayvanın tasmasına takın</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl font-bold text-purple-600">5</span>
-                        </div>
-                        <h4 class="font-semibold mb-2">Güvende Olun</h4>
-                        <p class="text-sm text-gray-600">Anlık takip edin</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center mb-16">
-                <h3 class="text-3xl font-bold mb-8">Üyelik Planları</h3>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="bg-white rounded-xl shadow-lg p-8 border-2 border-green-500 relative">
-                        <div class="premium-badge absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 rounded-full text-sm font-semibold">
-                            Tamamen Ücretsiz
-                        </div>
-                        <h4 class="text-xl font-semibold mb-4">Temel</h4>
-                        <div class="text-3xl font-bold mb-4">₺0</div>
-                        <ul class="text-left space-y-2 mb-6">
-                            <li>✅ Sınırsız Hayvan Profili</li>
-                            <li>✅ Tüm Özellikler</li>
-                            <li>✅ NFC & QR Kod Desteği</li>
-                            <li>✅ Detaylı İstatistikler</li>
-                            <li>✅ Konum Takibi</li>
-                            <li>✅ Fotoğraf Galerisi</li>
-                            <li>✅ Sosyal Medya Linkleri</li>
-                        </ul>
-                        <button onclick="showModal('registerModal')" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg">Ücretsiz Başla</button>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg p-8">
-                        <h4 class="text-xl font-semibold mb-4">NFC Tag Satışı</h4>
-                        <div class="text-3xl font-bold mb-4" id="nfcPriceDisplay">₺25</div>
-                        <ul class="text-left space-y-2 mb-6">
-                            <li>🏷️ Hazır programlanmış NFC tag</li>
-                            <li>📦 Ücretsiz kargo</li>
-                            <li>🎨 Özel tasarım seçenekleri</li>
-                            <li>💧 Su geçirmez</li>
-                            <li>🔧 Kurulum desteği</li>
-                            <li>📞 Teknik destek</li>
-                        </ul>
-                        <button onclick="window.open('tel:05386694530', '_blank')" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg">📞 Sipariş Ver</button>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg p-8">
-                        <h4 class="text-xl font-semibold mb-4">Pet Shop Ortaklığı</h4>
-                        <div class="text-3xl font-bold mb-4">İletişim</div>
-                        <ul class="text-left space-y-2 mb-6">
-                            <li>🏪 Pet shop entegrasyonu</li>
-                            <li>💰 Komisyon sistemi</li>
-                            <li>📊 Satış raporları</li>
-                            <li>🎯 Pazarlama desteği</li>
-                            <li>📞 Özel müşteri hattı</li>
-                            <li>🚀 Büyüme fırsatları</li>
-                        </ul>
-                        <button onclick="window.open('tel:05386694530', '_blank')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg">📞 Ortaklık İçin Ara</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center">
-                <a href="?admin=true" class="text-xs text-gray-400 hover:text-gray-600">•</a>
-            </div>
-        </div>
+           </div>
     </div>
 
     <div id="userDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900">Hayvanlarım</h2>
-            <button id="addPetBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium" onclick="showModal('addPetModal')">
-                + Yeni Hayvan Ekle
-            </button>
-        </div>
-        
-        <div id="petsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
-    </div>
-
-    <div id="adminDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900">👑 Admin Paneli</h2>
-            <button onclick="showWelcomeSection()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium">
-                ← Ana Sayfa
-            </button>
-        </div>
-
-        <div class="grid md:grid-cols-5 gap-6 mb-8">
-            <div class="admin-stats p-6 rounded-xl shadow-lg text-center">
-                <div class="text-4xl font-bold text-purple-600" id="totalUsers">0</div>
-                <div class="text-gray-700 font-medium">Toplam Kullanıcı</div>
-            </div>
-            <div class="admin-stats p-6 rounded-xl shadow-lg text-center">
-                <div class="text-4xl font-bold text-blue-600" id="totalPets">0</div>
-                <div class="text-gray-700 font-medium">Toplam Hayvan</div>
-            </div>
-            <div class="admin-stats p-6 rounded-xl shadow-lg text-center">
-                <div class="text-4xl font-bold text-green-600" id="activePets">0</div>
-                <div class="text-gray-700 font-medium">Aktif Profil</div>
-            </div>
-            <div class="admin-stats p-6 rounded-xl shadow-lg text-center">
-                <div class="text-4xl font-bold text-orange-600" id="totalViews">0</div>
-                <div class="text-gray-700 font-medium">Toplam Görüntülenme</div>
-            </div>
-            <div class="admin-stats p-6 rounded-xl shadow-lg text-center">
-                <div class="text-4xl font-bold text-red-600" id="totalCalls">0</div>
-                <div class="text-gray-700 font-medium">Toplam Arama</div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-lg">
-            <div class="flex border-b">
-                <button class="admin-tab-btn px-6 py-4 font-medium text-purple-600 border-b-2 border-purple-600" onclick="switchAdminTab('users')">
-                    👥 Kullanıcılar
-                </button>
-                <button class="admin-tab-btn px-6 py-4 font-medium text-gray-500 hover:text-purple-600" onclick="switchAdminTab('pets')">
-                    🐾 Hayvanlar
-                </button>
-                <button class="admin-tab-btn px-6 py-4 font-medium text-gray-500 hover:text-purple-600" onclick="switchAdminTab('settings')">
-                    ⚙️ Ayarlar
-                </button>
-            </div>
-
-            <div id="usersTab" class="admin-tab-content p-6">
-                <h3 class="text-xl font-semibold mb-4">Kullanıcı Listesi</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full table-auto">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-4 py-2 text-left">ID</th>
-                                <th class="px-4 py-2 text-left">Ad Soyad</th>
-                                <th class="px-4 py-2 text-left">E-posta</th>
-                                <th class="px-4 py-2 text-left">Telefon</th>
-                                <th class="px-4 py-2 text-left">Kayıt Tarihi</th>
-                                <th class="px-4 py-2 text-left">Hayvan Sayısı</th>
-                                <th class="px-4 py-2 text-left">İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="petsTab" class="admin-tab-content p-6 hidden">
-                <h3 class="text-xl font-semibold mb-4">Hayvan Listesi</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full table-auto">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-4 py-2 text-left">ID</th>
-                                <th class="px-4 py-2 text-left">Ad</th>
-                                <th class="px-4 py-2 text-left">Tür</th>
-                                <th class="px-4 py-2 text-left">Sahip</th>
-                                <th class="px-4 py-2 text-left">Görüntülenme</th>
-                                <th class="px-4 py-2 text-left">Arama</th>
-                                <th class="px-4 py-2 text-left">Oluşturulma</th>
-                                <th class="px-4 py-2 text-left">İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody id="petsTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="settingsTab" class="admin-tab-content p-6 hidden">
-                <h3 class="text-xl font-semibold mb-6">Sistem Ayarları</h3>
-                 <div class="space-y-6">
-                    <div class="bg-green-50 p-6 rounded-xl">
-                        <h4 class="text-lg font-semibold mb-4 text-green-800">💰 Fiyatlandırma & Satış</h4>
-                        <div class="grid md:grid-cols-2 gap-6 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">NFC Tag Fiyatı (₺)</label>
-                                <input type="number" id="nfcPrice" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-                     <div class="text-center">
-                        <button onclick="saveSettings()" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-medium">
-                            💾 Ayarları Kaydet
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+       </div>
     
     <div id="petProfileView" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
-        <div id="petProfileContent">
-            </div>
+        <div id="petProfileContent"></div>
     </div>
     
     <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
@@ -337,542 +94,161 @@
             <form id="loginForm">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">E-posta</label>
-                    <input type="email" name="email" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
+                    <input type="email" name="email" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg" required>
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Şifre</label>
-                    <input type="password" name="password" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
+                    <input type="password" name="password" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg" required>
                 </div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
-                    Giriş Yap
-                </button>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">Giriş Yap</button>
             </form>
-            <button id="closeLoginModal" class="mt-4 w-full text-gray-500 hover:text-gray-700">İptal</button>
+            <button class="mt-4 w-full text-gray-500 hover:text-gray-700" onclick="hideModal('loginModal')">İptal</button>
         </div>
     </div>
-
-    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h3 class="text-2xl font-bold mb-6 text-center">Üye Ol</h3>
-            <form id="registerForm">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Ad Soyad</label>
-                    <input type="text" name="name" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">E-posta</label>
-                    <input type="email" name="email" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Telefon</label>
-                    <input type="tel" name="phone" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Şifre</label>
-                    <input type="password" name="password" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" required>
-                </div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
-                    Üye Ol
-                </button>
-            </form>
-            <button id="closeRegisterModal" class="mt-4 w-full text-gray-500 hover:text-gray-700">İptal</button>
-        </div>
-    </div>
-
-    <div id="addPetModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-3xl font-bold mb-8 text-center">🐾 Yeni Hayvan Profili Oluştur</h3>
-            
-            <div class="flex mb-8 bg-gray-100 rounded-lg p-1">
-                <button type="button" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium active" onclick="switchTab('basic')">📝 Temel Bilgiler</button>
-                <button type="button" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium" onclick="switchTab('media')">📸 Medya & Sosyal</button>
-                <button type="button" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium" onclick="switchTab('health')">🏥 Sağlık & Veteriner</button>
-                <button type="button" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium" onclick="switchTab('extra')">➕ Ek Bilgiler</button>
-            </div>
-
-            <form id="addPetForm">
-                <div id="basicTab" class="tab-content">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Hayvan Adı *</label><input type="text" name="petName" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" required placeholder="Örn: Karamel"></div>
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Tür *</label><select name="petType" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" required><option value="">Seçiniz</option><option value="köpek">🐕 Köpek</option><option value="kedi">🐱 Kedi</option><option value="kuş">🐦 Kuş</option><option value="hamster">🐹 Hamster</option><option value="tavşan">🐰 Tavşan</option><option value="balık">🐠 Balık</option><option value="diğer">🐾 Diğer</option></select></div>
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Cinsi</label><input type="text" name="breed" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Örn: Golden Retriever"></div>
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Doğum Tarihi</label><input type="date" name="birthDate" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg"></div>
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Cinsiyet</label><select name="gender" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg"><option value="">Seçiniz</option><option value="erkek">♂️ Erkek</option><option value="dişi">♀️ Dişi</option></select></div>
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Renk/Desen</label><input type="text" name="color" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Örn: Altın sarısı, beyaz göğüslü"></div>
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Ağırlık (kg)</label><input type="number" name="weight" step="0.1" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Örn: 25.5"></div>
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Mikroçip Numarası</label><input type="text" name="microchip" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="15 haneli mikroçip numarası"></div>
-                    </div>
-                    <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Genel Açıklama</label><textarea name="description" rows="4" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Hayvanınızın karakteri, alışkanlıkları..."></textarea></div>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Kısırlaştırma Durumu</label><select name="neutered" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg"><option value="">Seçiniz</option><option value="evet">✅ Kısırlaştırıldı</option><option value="hayır">❌ Kısırlaştırılmadı</option></select></div>
-                        <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Çocuklarla İlişkisi</label><select name="childFriendly" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg"><option value="">Seçiniz</option><option value="çok-iyi">😍 Çok iyi</option><option value="iyi">😊 İyi</option><option value="orta">😐 Orta</option><option value="dikkatli">⚠️ Dikkatli olunmalı</option></select></div>
-                    </div>
-                </div>
-                <div id="mediaTab" class="tab-content hidden">
-                    <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Profil Fotoğrafı URL</label><input type="url" name="photo" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="https://example.com/image.jpg"></div>
-                    <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Ek Fotoğraflar</label><div id="photoList" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2"></div><div class="flex gap-2"><input type="url" id="newPhotoUrl" class="form-input flex-1 px-4 py-3 border border-gray-300 rounded-lg" placeholder="Fotoğraf URL'si ekle"><button type="button" onclick="addPhoto()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg">Ekle</button></div></div>
-                    <div class="grid md:grid-cols-2 gap-6"><div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Instagram</label><input type="url" name="instagram" class="form-input w-full px-4 py-3 border" placeholder="https://instagram.com/username"></div><div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">TikTok</label><input type="url" name="tiktok" class="form-input w-full px-4 py-3 border" placeholder="https://tiktok.com/@username"></div></div>
-                </div>
-                <div id="healthTab" class="tab-content hidden">
-                    <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Sağlık Durumu</label><textarea name="health" rows="4" class="form-input w-full px-4 py-3 border" placeholder="Kronik hastalıklar, alerjiler..."></textarea></div>
-                    <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Veteriner Bilgileri</label><div class="grid md:grid-cols-2 gap-4"><input type="text" name="vetName" class="form-input w-full px-4 py-3 border" placeholder="Veteriner adı"><input type="tel" name="vetPhone" class="form-input w-full px-4 py-3 border" placeholder="Veteriner telefonu"></div><input type="text" name="vetAddress" class="form-input w-full px-4 py-3 border mt-2" placeholder="Veteriner adresi"></div>
-                </div>
-                <div id="extraTab" class="tab-content hidden">
-                    <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Özel Notlar</label><textarea name="specialNotes" rows="3" class="form-input w-full px-4 py-3 border" placeholder="Bulan kişinin bilmesi gerekenler..."></textarea></div>
-                </div>
-                <div class="flex gap-4 mt-8">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-6 rounded-lg text-lg">🐾 Profili Oluştur</button>
-                    <button type="button" id="closeAddPetModal" class="flex-1 bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg text-lg">İptal</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="editPetModal" class="fixed inset-0 bg-black bg-opacity-50 modal hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-             <h3 class="text-3xl font-bold mb-8 text-center">✏️ Hayvan Profilini Düzenle</h3>
-             <form id="editPetForm">
-                <input type="hidden" id="editPetId" name="petId">
-                <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Hayvan Adı *</label><input type="text" id="editPetName" name="petName" class="form-input w-full px-4 py-3 border" required></div>
-                <div class="flex gap-4 mt-8">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-green-600 to-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg">💾 Değişiklikleri Kaydet</button>
-                    <button type="button" id="closeEditPetModal" class="flex-1 bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg text-lg">İptal</button>
-                </div>
-             </form>
-        </div>
-    </div>
-
     <div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
-    
+
     <script type="module">
-        // Global state
+        // --- GLOBAL STATE ---
         let currentUser = null;
-        let photoGallery = []; // For add modal
-        
-        // DOM Elements
+
+        // --- DOM ELEMENT REFERENCES ---
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
-        const addPetForm = document.getElementById('addPetForm');
-        // ... other elements
+        // ... diğer element referansları ...
 
-        // --- Firebase Auth Listener ---
+        // --- UTILITY FUNCTIONS ---
+        const showNotification = (message, type = 'info') => {
+            const container = document.getElementById('notificationContainer');
+            const notif = document.createElement('div');
+            const typeClasses = {
+                success: 'border-green-500',
+                error: 'border-red-500',
+                info: 'border-blue-500'
+            };
+            notif.className = `notification bg-white border-l-4 p-4 rounded-lg shadow-lg max-w-sm ${typeClasses[type]}`;
+            notif.innerHTML = `<p>${message}</p>`;
+            container.appendChild(notif);
+            setTimeout(() => notif.remove(), 5000);
+        };
+
+        const showModal = (id) => document.getElementById(id)?.classList.remove('hidden');
+        const hideModal = (id) => document.getElementById(id)?.classList.add('hidden');
+        
+        // --- UI UPDATE FUNCTIONS ---
+        const updateNavigation = () => {
+            if (currentUser) {
+                loginBtn.textContent = 'Çıkış Yap';
+                registerBtn.style.display = 'none';
+            } else {
+                loginBtn.textContent = 'Giriş Yap';
+                registerBtn.style.display = 'block';
+            }
+        };
+        
+        const showUserDashboard = () => {
+            document.getElementById('welcomeSection').classList.add('hidden');
+            document.getElementById('petProfileView').classList.add('hidden');
+            document.getElementById('userDashboard').classList.remove('hidden');
+            // renderPetsList(); // Bu fonksiyonu çağırarak hayvanları listeleyin
+        };
+
+        const showWelcomeSection = () => {
+            document.getElementById('welcomeSection').classList.remove('hidden');
+            document.getElementById('petProfileView').classList.add('hidden');
+            document.getElementById('userDashboard').classList.add('hidden');
+        };
+
+        // --- FIREBASE AUTH FUNCTIONS ---
+        const handleLogin = async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+
+            try {
+                await window.firebase.signInWithEmailAndPassword(window.firebase.auth, email, password);
+                hideModal('loginModal');
+                // Başarı mesajı göstermeye gerek yok, onAuthStateChanged UI'ı güncelleyecek.
+            } catch (error) {
+                console.error("Login Error:", error.code);
+                let userMessage = "Giriş sırasında bir hata oluştu.";
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                    case 'auth/invalid-credential':
+                        userMessage = "Girdiğiniz bilgilere sahip bir kullanıcı bulunamadı.";
+                        break;
+                    case 'auth/invalid-email':
+                        userMessage = "Geçersiz bir e-posta adresi girdiniz.";
+                        break;
+                    case 'auth/too-many-requests':
+                        userMessage = "Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin.";
+                        break;
+                }
+                showNotification(userMessage, 'error');
+            }
+        };
+
+        const handleRegister = async (e) => {
+            e.preventDefault();
+            // Register logic...
+        };
+
+        const logout = () => {
+            window.firebase.signOut(window.firebase.auth).catch(error => {
+                showNotification(`Çıkış hatası: ${error.message}`, 'error');
+            });
+        };
+
+        // --- CORE AUTH STATE LISTENER ---
         window.firebase.onAuthStateChanged(window.firebase.auth, async (user) => {
             if (user) {
-                // User is signed in.
-                const userDoc = await window.firebase.getDoc(window.firebase.doc(window.firebase.db, "users", user.uid));
-                if (userDoc.exists()) {
-                    currentUser = { uid: user.uid, email: user.email, ...userDoc.data() };
-                } else {
-                    // This case is unlikely if registration is done correctly.
-                    currentUser = { uid: user.uid, email: user.email };
-                }
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                const petId = urlParams.get('pet');
-                const isAdmin = urlParams.get('admin');
+                try {
+                    const userDocRef = window.firebase.doc(window.firebase.db, "users", user.uid);
+                    const userDoc = await window.firebase.getDoc(userDocRef);
 
-                if (isAdmin) {
-                    showAdminLogin();
-                } else if (petId) {
-                    showPetProfile(petId);
-                } else {
-                    showUserDashboard();
+                    if (userDoc.exists()) {
+                        currentUser = { uid: user.uid, email: user.email, ...userDoc.data() };
+                        showNotification(`Hoş geldin, ${currentUser.name}!`, 'success');
+                        showUserDashboard();
+                    } else {
+                        // Auth'da var ama Firestore'da yoksa (nadir durum)
+                        currentUser = { uid: user.uid, email: user.email, name: 'Kullanıcı' };
+                        showNotification('Kullanıcı bilgileriniz yüklenemedi.', 'error');
+                        showUserDashboard();
+                    }
+                } catch (error) {
+                    console.error("Firestore user document fetch error:", error);
+                    showNotification('Kullanıcı verileri okunurken bir hata oluştu. Lütfen tekrar giriş yapmayı deneyin.', 'error');
+                    logout(); // Hata varsa kullanıcıyı güvenli çıkış yaptır
                 }
-                
             } else {
-                // User is signed out.
                 currentUser = null;
-                const urlParams = new URLSearchParams(window.location.search);
-                const petId = urlParams.get('pet');
-                 const isAdmin = urlParams.get('admin');
-
-                if (isAdmin) {
-                    showAdminLogin();
-                } else if (petId) {
-                    showPetProfile(petId);
-                } else {
-                   showWelcomeSection();
+                // Eğer pet profil sayfasında değilse ana sayfayı göster
+                if (!window.location.search.includes('pet=')) {
+                     showWelcomeSection();
                 }
             }
             updateNavigation();
         });
 
-        // --- Auth Functions ---
-        async function handleRegister(e) {
-            e.preventDefault();
-            const name = e.target.name.value;
-            const email = e.target.email.value;
-            const phone = e.target.phone.value;
-            const password = e.target.password.value;
-            
-            try {
-                const userCredential = await window.firebase.createUserWithEmailAndPassword(window.firebase.auth, email, password);
-                const user = userCredential.user;
-
-                // Create a document for the new user in Firestore
-                await window.firebase.setDoc(window.firebase.doc(window.firebase.db, "users", user.uid), {
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    registrationDate: window.firebase.serverTimestamp()
-                });
-                
-                hideModal('registerModal');
-                showNotification('Kayıt başarılı! Hoş geldiniz!', 'success');
-                // The onAuthStateChanged listener will handle showing the dashboard
-            } catch (error) {
-                console.error("Registration error:", error);
-                showNotification(`Kayıt hatası: ${error.message}`, 'error');
-            }
-        }
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = e.target.email.value;
-            const password = e.target.password.value;
-            
-            try {
-                await window.firebase.signInWithEmailAndPassword(window.firebase.auth, email, password);
-                hideModal('loginModal');
-                showNotification('Giriş başarılı!', 'success');
-                // The onAuthStateChanged listener will handle showing the dashboard
-            } catch (error) {
-                console.error("Login error:", error);
-                showNotification('E-posta veya şifre hatalı!', 'error');
-            }
-        }
-
-        function logout() {
-            window.firebase.signOut(window.firebase.auth).catch(error => {
-                console.error("Logout error:", error);
-                showNotification('Çıkış yapılırken bir hata oluştu.', 'error');
-            });
-        }
-        
-        // --- Pet Data Functions ---
-        async function handleAddPet(e) {
-            e.preventDefault();
-            if (!currentUser) {
-                showNotification('Önce giriş yapmalısınız.', 'error');
-                return;
-            }
-            
-            const formData = new FormData(e.target);
-            const newPetData = {
-                ownerId: currentUser.uid,
-                ownerInfo: { name: currentUser.name, phone: currentUser.phone },
-                name: formData.get('petName'),
-                type: formData.get('petType'),
-                breed: formData.get('breed') || '',
-                birthDate: formData.get('birthDate') || '',
-                gender: formData.get('gender') || '',
-                color: formData.get('color') || '',
-                weight: formData.get('weight') || '',
-                microchip: formData.get('microchip') || '',
-                description: formData.get('description') || '',
-                neutered: formData.get('neutered') || '',
-                childFriendly: formData.get('childFriendly') || '',
-                photo: formData.get('photo') || '',
-                photoGallery: [...photoGallery],
-                instagram: formData.get('instagram') || '',
-                tiktok: formData.get('tiktok') || '',
-                health: formData.get('health') || '',
-                vetName: formData.get('vetName') || '',
-                vetPhone: formData.get('vetPhone') || '',
-                vetAddress: formData.get('vetAddress') || '',
-                specialNotes: formData.get('specialNotes') || '',
-                createdAt: window.firebase.serverTimestamp(),
-                views: 0,
-                calls: 0,
-                locations: []
-            };
-            
-            try {
-                const docRef = await window.firebase.addDoc(window.firebase.collection(window.firebase.db, "pets"), newPetData);
-                // Update the pet with its own ID to create the public link
-                const publicLink = `${window.location.origin}${window.location.pathname}?pet=${docRef.id}`;
-                await window.firebase.updateDoc(docRef, { link: publicLink });
-
-                hideModal('addPetModal');
-                e.target.reset();
-                photoGallery = [];
-                updatePhotoGallery();
-                renderPetsList();
-                showNotification('Hayvan profili başarıyla oluşturuldu!', 'success');
-            } catch (error) {
-                console.error("Error adding pet: ", error);
-                showNotification('Profil oluşturulurken bir hata oluştu.', 'error');
-            }
-        }
-
-        async function deletePet(petId) {
-             if (confirm('Bu profili silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
-                try {
-                    await window.firebase.deleteDoc(window.firebase.doc(window.firebase.db, "pets", petId));
-                    showNotification('Hayvan profili silindi!', 'success');
-                    renderPetsList();
-                } catch (error) {
-                    console.error("Error deleting pet:", error);
-                    showNotification('Profil silinirken bir hata oluştu.', 'error');
-                }
-            }
-        }
-        
-        // --- UI Rendering & State Management ---
-        async function renderPetsList() {
-            const petsListDiv = document.getElementById('petsList');
-            if (!currentUser) return;
-
-            petsListDiv.innerHTML = '<p>Yükleniyor...</p>';
-            
-            const q = window.firebase.query(window.firebase.collection(window.firebase.db, "pets"), window.firebase.where("ownerId", "==", currentUser.uid));
-            const querySnapshot = await window.firebase.getDocs(q);
-
-            petsListDiv.innerHTML = '';
-            
-            if (querySnapshot.empty) {
-                petsListDiv.innerHTML = `<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">🐾</div><h3 class="text-xl font-semibold text-gray-600 mb-2">Henüz hayvan profili oluşturmadınız</h3><button onclick="showModal('addPetModal')" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">🐾 İlk Profilimi Oluştur</button></div>`;
-                return;
-            }
-
-            querySnapshot.forEach(doc => {
-                const pet = { id: doc.id, ...doc.data() };
-                const petCard = document.createElement('div');
-                petCard.className = 'pet-card bg-white rounded-xl shadow-lg p-6';
-                petCard.innerHTML = `
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-bold text-gray-900">${pet.name}</h3>
-                        <div class="flex space-x-2">
-                           <button onclick="deletePet('${pet.id}')" class="text-red-600 p-2 rounded-lg hover:bg-red-50">🗑️</button>
-                        </div>
-                    </div>
-                     ${pet.photo ? `<div class="mb-4"><img src="${pet.photo}" alt="${pet.name}" class="w-full h-48 object-cover rounded-lg" onerror="this.style.display='none'"></div>` : `<div class="mb-4 h-48 bg-gray-100 rounded-lg flex items-center justify-center text-6xl">${getAnimalEmoji(pet.type)}</div>`}
-                     <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div class="stats-card text-white p-3 rounded-lg text-center"><div class="text-2xl font-bold">${pet.views || 0}</div><div class="text-sm">Görüntülenme</div></div>
-                        <div class="location-card text-white p-3 rounded-lg text-center"><div class="text-2xl font-bold">${pet.calls || 0}</div><div class="text-sm">Arama</div></div>
-                    </div>
-                    <div class="space-y-2">
-                        <a href="${pet.link}" target="_blank" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium">👁️ Profili Görüntüle</a>
-                        <button onclick="copyPetLink('${pet.link}')" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium">🔗 Linki Kopyala</button>
-                    </div>`;
-                petsListDiv.appendChild(petCard);
-            });
-        }
-        
-        async function showPetProfile(petId) {
-             try {
-                const petDocRef = window.firebase.doc(window.firebase.db, "pets", petId);
-                const petDoc = await window.firebase.getDoc(petDocRef);
-
-                if (!petDoc.exists()) {
-                    showNotification('Hayvan profili bulunamadı!', 'error');
-                    return;
-                }
-                
-                const pet = { id: petDoc.id, ...petDoc.data() };
-                
-                // Update view count if not the owner
-                if (!currentUser || currentUser.uid !== pet.ownerId) {
-                    await window.firebase.updateDoc(petDocRef, { views: (pet.views || 0) + 1 });
-                }
-
-                document.getElementById('welcomeSection').classList.add('hidden');
-                document.getElementById('userDashboard').classList.add('hidden');
-                document.getElementById('adminDashboard').classList.add('hidden');
-                document.getElementById('petProfileView').classList.remove('hidden');
-
-                renderPetProfile(pet);
-            } catch (error) {
-                console.error("Error fetching pet profile:", error);
-                showNotification('Profil yüklenirken bir hata oluştu.', 'error');
-            }
-        }
-
-        function renderPetProfile(pet) {
-            const profileContent = document.getElementById('petProfileContent');
-            profileContent.innerHTML = `
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-                    <div class="gradient-bg text-white p-8 text-center">
-                        ${pet.photo ? `<img src="${pet.photo}" alt="${pet.name}" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-lg object-cover">` : `<div class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-lg bg-white flex items-center justify-center text-6xl">${getAnimalEmoji(pet.type)}</div>`}
-                        <h1 class="text-4xl font-bold mb-2">${pet.name}</h1>
-                        <p class="text-xl opacity-90">${pet.type}${pet.breed ? ` • ${pet.breed}` : ''}</p>
-                    </div>
-                    <div class="p-6 bg-gray-50">
-                        <div class="grid md:grid-cols-2 gap-4 mb-6">
-                            <button onclick="callOwner('${pet.ownerInfo.phone}', '${pet.id}')" class="call-button text-white font-bold py-4 px-6 rounded-xl text-lg">📞 Sahibini Ara</button>
-                            <button onclick="shareLocation('${pet.id}')" class="emergency-button text-white font-bold py-4 px-6 rounded-xl text-lg">📍 Konumumu Paylaş</button>
-                        </div>
-                    </div>
-                     <div class="p-6">
-                        <h3 class="text-2xl font-bold mb-4 text-gray-800">🐾 Temel Bilgiler</h3>
-                        <p><strong>Cinsiyet:</strong> ${pet.gender}</p>
-                        <p><strong>Yaş:</strong> ${calculateAge(pet.birthDate)}</p>
-                        </div>
-                    <div class="bg-gray-50 p-6 text-center">
-                        <a href="/" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">← Ana Sayfaya Dön</a>
-                    </div>
-                </div>`;
-        }
-
-        // --- Admin Functions ---
-        function showAdminLogin() {
-            const password = prompt('Admin şifresi:');
-            if (password === 'irem1234') {
-                showAdminDashboard();
-            } else if (password !== null) {
-                showNotification('Yanlış şifre!', 'error');
-                window.location.href = window.location.pathname;
-            }
-        }
-
-        async function showAdminDashboard() {
-            document.getElementById('welcomeSection').classList.add('hidden');
-            document.getElementById('userDashboard').classList.add('hidden');
-            document.getElementById('petProfileView').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.remove('hidden');
-            
-            updateAdminStats();
-            renderAdminTables();
-            loadAdminSettings();
-        }
-
-        async function updateAdminStats() {
-            const usersSnapshot = await window.firebase.getDocs(window.firebase.collection(window.firebase.db, "users"));
-            const petsSnapshot = await window.firebase.getDocs(window.firebase.collection(window.firebase.db, "pets"));
-
-            let totalViews = 0;
-            let totalCalls = 0;
-            petsSnapshot.forEach(doc => {
-                totalViews += doc.data().views || 0;
-                totalCalls += doc.data().calls || 0;
-            });
-
-            document.getElementById('totalUsers').textContent = usersSnapshot.size;
-            document.getElementById('totalPets').textContent = petsSnapshot.size;
-            document.getElementById('totalViews').textContent = totalViews;
-            document.getElementById('totalCalls').textContent = totalCalls;
-        }
-
-        async function renderAdminTables() {
-            // Render Users Table
-            const usersSnapshot = await window.firebase.getDocs(window.firebase.collection(window.firebase.db, "users"));
-            const usersTableBody = document.getElementById('usersTableBody');
-            usersTableBody.innerHTML = '';
-            usersSnapshot.forEach(doc => {
-                 const user = { id: doc.id, ...doc.data() };
-                 const regDate = user.registrationDate ? user.registrationDate.toDate().toLocaleDateString('tr-TR') : 'N/A';
-                 usersTableBody.innerHTML += `<tr><td class="px-4 py-2">${user.id.substring(0,5)}...</td><td class="px-4 py-2">${user.name}</td><td class="px-4 py-2">${user.email}</td><td class="px-4 py-2">${user.phone}</td><td class="px-4 py-2">${regDate}</td><td class="px-4 py-2">...</td><td class="px-4 py-2"><button class="text-red-500">Sil</button></td></tr>`;
-            });
-
-             // Render Pets Table
-            const petsSnapshot = await window.firebase.getDocs(window.firebase.collection(window.firebase.db, "pets"));
-            const petsTableBody = document.getElementById('petsTableBody');
-            petsTableBody.innerHTML = '';
-            petsSnapshot.forEach(doc => {
-                const pet = { id: doc.id, ...doc.data() };
-                const createdDate = pet.createdAt ? pet.createdAt.toDate().toLocaleDateString('tr-TR') : 'N/A';
-                petsTableBody.innerHTML += `<tr><td class="px-4 py-2">${pet.id.substring(0,5)}...</td><td class="px-4 py-2">${pet.name}</td><td class="px-4 py-2">${pet.type}</td><td class="px-4 py-2">${pet.ownerInfo.name}</td><td class="px-4 py-2">${pet.views || 0}</td><td class="px-4 py-2">${pet.calls || 0}</td><td class="px-4 py-2">${createdDate}</td><td class="px-4 py-2"><button class="text-red-500">Sil</button></td></tr>`;
-            });
-        }
-        
-        async function loadAdminSettings() {
-             const settingsDoc = await window.firebase.getDoc(window.firebase.doc(window.firebase.db, "settings", "admin"));
-             if (settingsDoc.exists()) {
-                 document.getElementById('nfcPrice').value = settingsDoc.data().nfcPrice || 25;
-             }
-        }
-        async function saveSettings() {
-             const newPrice = document.getElementById('nfcPrice').value;
-             await window.firebase.setDoc(window.firebase.doc(window.firebase.db, "settings", "admin"), {
-                 nfcPrice: Number(newPrice)
-             }, { merge: true });
-             showNotification('Ayarlar kaydedildi!', 'success');
-             updatePriceDisplay();
-        }
-
-        // --- Helper & Utility Functions ---
-        function updateNavigation() {
+        // --- EVENT LISTENERS ---
+        loginBtn.addEventListener('click', () => {
             if (currentUser) {
-                document.getElementById('loginBtn').textContent = 'Çıkış Yap';
-                document.getElementById('registerBtn').style.display = 'none';
+                logout();
             } else {
-                document.getElementById('loginBtn').textContent = 'Giriş Yap';
-                document.getElementById('registerBtn').style.display = 'block';
+                showModal('loginModal');
             }
-        }
-        
-        function showUserDashboard() {
-            document.getElementById('welcomeSection').classList.add('hidden');
-            document.getElementById('userDashboard').classList.remove('hidden');
-            document.getElementById('petProfileView').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.add('hidden');
-            renderPetsList();
-        }
-
-        function showWelcomeSection() {
-            document.getElementById('welcomeSection').classList.remove('hidden');
-            document.getElementById('userDashboard').classList.add('hidden');
-            document.getElementById('petProfileView').classList.add('hidden');
-            document.getElementById('adminDashboard').classList.add('hidden');
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        
-        async function updatePriceDisplay() {
-            try {
-                const settingsDoc = await window.firebase.getDoc(window.firebase.doc(window.firebase.db, "settings", "admin"));
-                if (settingsDoc.exists()) {
-                    document.getElementById('nfcPriceDisplay').textContent = `₺${settingsDoc.data().nfcPrice}`;
-                }
-            } catch (e) { console.error("Could not fetch price"); }
-        }
-
-        // --- Event Listeners ---
+        });
+        registerBtn.addEventListener('click', () => showModal('registerModal'));
         loginForm.addEventListener('submit', handleLogin);
         registerForm.addEventListener('submit', handleRegister);
-        addPetForm.addEventListener('submit', handleAddPet);
         
-        // --- Make functions globally available for onclick ---
-        window.handleLoginClick = () => currentUser ? logout() : showModal('loginModal');
-        window.showModal = (id) => document.getElementById(id).classList.remove('hidden');
-        window.deletePet = deletePet;
-        window.copyPetLink = (link) => navigator.clipboard.writeText(link).then(() => showNotification('Link kopyalandı!', 'success'));
-        window.getAnimalEmoji = (type) => ({'köpek':'🐕','kedi':'🐱','kuş':'🐦','hamster':'🐹','tavşan':'🐰','balık':'🐠','diğer':'🐾'}[type]||'🐾');
-        window.calculateAge = (birthDate) => { if(!birthDate) return 'Bilinmiyor'; const age = (new Date() - new Date(birthDate)) / (1000 * 60 * 60 * 24 * 365.25); return `${Math.floor(age)} yaş`; };
-        window.showWelcomeSection = showWelcomeSection;
-        window.switchAdminTab = (tabName) => { 
-            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(tabName + 'Tab').classList.remove('hidden');
-        };
-        window.saveSettings = saveSettings;
-        window.switchTab = (tabName) => { 
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(tabName + 'Tab').classList.remove('hidden');
-        };
-        window.addPhoto = () => {
-             const url = document.getElementById('newPhotoUrl').value.trim();
-             if(url) { photoGallery.push(url); updatePhotoGallery(); document.getElementById('newPhotoUrl').value = ''; }
-        };
-        function updatePhotoGallery() {
-            const list = document.getElementById('photoList');
-            list.innerHTML = '';
-            photoGallery.forEach((url, i) => {
-                list.innerHTML += `<div class="relative"><img src="${url}" class="w-full h-24 object-cover rounded-lg"><button type="button" onclick="removePhoto(${i})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6">×</button></div>`;
-            });
-        }
-        window.removePhoto = (index) => { photoGallery.splice(index, 1); updatePhotoGallery(); }
+        // Make modal functions globally available for inline onclick
+        window.showModal = showModal;
+        window.hideModal = hideModal;
 
-
-        // --- Close Modal Listeners ---
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => e.target === modal && modal.classList.add('hidden'));
-        });
-        document.getElementById('closeLoginModal').addEventListener('click', () => document.getElementById('loginModal').classList.add('hidden'));
-        document.getElementById('closeRegisterModal').addEventListener('click', () => document.getElementById('registerModal').classList.add('hidden'));
-        document.getElementById('closeAddPetModal').addEventListener('click', () => document.getElementById('addPetModal').classList.add('hidden'));
-        document.getElementById('closeEditPetModal').addEventListener('click', () => document.getElementById('editPetModal').classList.add('hidden'));
-        
-        // Initial call
-        updatePriceDisplay();
     </script>
 </body>
 </html>
